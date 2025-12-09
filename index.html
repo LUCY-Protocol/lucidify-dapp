@@ -1,1039 +1,140 @@
 <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <title>
-        LUCIDIFY (LUCY) – Professional Presale dApp
-      </title>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta
-    name="description"
-    content="LUCIDIFY (LUCY) – a professional Polygon presale dApp with neon 3D background, wallet connect, transactions, and tokenomics dashboard."
-  />
-      <!-- Tailwind via CDN -->
-        <script src="https://cdn.tailwindcss.com">
-        </script>
-        <script>
-          tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            lucidBg: "#050816",
-            lucidGreen: "#00FF66",
-            lucidYellow: "#FFD93D",
-          },
-          animation: {
-            "glow-pulse": "glow-pulse 2s ease-in-out infinite",
-            float: "float 3s ease-in-out infinite",
-          },
-          keyframes: {
-            "glow-pulse": {
-              "0%, 100%": { boxShadow: "0 0 20px rgba(0, 255, 102, 0.5)" },
-              "50%": { boxShadow: "0 0 40px rgba(0, 255, 102, 0.9)" },
-            },
-            float: {
-              "0%, 100%": { transform: "translateY(0px)" },
-              "50%": { transform: "translateY(-10px)" },
-            },
-          },
-        },
-      },
-    };
-        </script>
-        <!-- React & ReactDOM (UMD) -->
-          <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin>
-          </script>
-          <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin>
-          </script>
-          <!-- Three.js for background -->
-            <script src="https://unpkg.com/three@0.160.0/build/three.min.js">
-            </script>
-            <!-- Ethers.js -->
-              <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js">
-              </script>
-              <style>
-                body {
-      background: radial-gradient(circle at top, #0b1020 0, #050816 55%, #020308 100%);
-      color: #ffffff;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      overflow-x: hidden;
-    }
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #050816;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 999px;
-    }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .hover-glow:hover {
-      box-shadow: 0 0 30px rgba(0, 255, 102, 0.22);
-    }
-    a.tx-link { color: #00FF66; text-decoration: underline; }
-              </style>
-            </head>
-            <body class="min-h-screen text-white">
-              <div id="root">
-              </div>
-              <script>
-                const { useState, useEffect, useRef } = React;
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>LUCIDIFY (LUCY) – Presale dApp</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
-    /* ========== CONFIG ========== */
-    const RATE = 100; // 1 MATIC = 100 LUCY (demo)
-    const PRESALE_TARGET = 500000; // 500k LUCY
-    const CURRENT_RAISED = 125000; // demo progress
+<style>
+body {background:#050816;color:#fff;font-family:sans-serif;overflow-x:hidden;}
+.bg-neon {background:radial-gradient(circle at 20% 20%, rgba(0,255,120,.25), transparent 60%),
+                       radial-gradient(circle at 80% 80%, rgba(255,230,0,.25), transparent 60%);}
+.glass {background:rgba(255,255,255,.04);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.1);}
+button:disabled {opacity:.4;cursor:not-allowed;}
+</style>
 
-    // Default presale receiver (replace with your wallet or contract)
-    const DEFAULT_PRESALE_WALLET = ""; // set to a checksummed address when enabling live transfers
+</head>
+<body class="bg-neon min-h-screen">
 
-    /* ========== 3D BACKGROUND ========== */
+<div id="root"></div>
 
-    function ThreeBackground() {
-      const mountRef = useRef(null);
+<script>
+const {useState,useEffect}=React;
 
-      useEffect(() => {
-        const mount = mountRef.current;
-        if (!mount || !window.THREE) return;
+// ---------------- CONFIG ----------------
 
-        const width = window.innerWidth;
-        const height = window.innerHeight;
+const PRESALE_ADDRESS="REPLACE_WITH_YOUR_CONTRACT";
+const RATE = 100; // 1 MATIC = X LUCY
+const PRESALE_ABI=[/* ---- PASTE ABI HERE ---- */];
 
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.Fog(0x050816, 10, 70);
+// ---------------- WALLET CONNECT ----------------
 
-        const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
-        camera.position.set(0, 2.5, 9);
+async function connectWallet(){
+  if(!window.ethereum) return alert("Install MetaMask first.");
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(width, height);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.setClearColor(0x000000, 0);
-        mount.appendChild(renderer.domElement);
+  const provider=new ethers.providers.Web3Provider(window.ethereum);
+  await provider.send("eth_requestAccounts",[]);
+  const signer=provider.getSigner();
+  const addr=await signer.getAddress();
 
-        const ambient = new THREE.AmbientLight(0x88ffcc, 0.5);
-        scene.add(ambient);
+  return {provider,signer,addr};
+}
 
-        const point1 = new THREE.PointLight(0x00ff66, 1.5, 35);
-        point1.position.set(5, 5, 5);
-        scene.add(point1);
+// ---------------- BUY FUNCTION ----------------
 
-        const point2 = new THREE.PointLight(0xffd93d, 1.2, 35);
-        point2.position.set(-5, 3, -5);
-        scene.add(point2);
+async function buyTokens(amount){
+  try{
+    const {provider,signer}=await connectWallet();
+    const contract=new ethers.Contract(PRESALE_ADDRESS,PRESALE_ABI,signer);
 
-        const gridGeometry = new THREE.PlaneGeometry(60, 60, 50, 50);
-        const gridMaterial = new THREE.MeshBasicMaterial({
-          color: 0x00ff66,
-          wireframe: true,
-          transparent: true,
-          opacity: 0.06,
-        });
-        const grid = new THREE.Mesh(gridGeometry, gridMaterial);
-        grid.rotation.x = -Math.PI / 2;
-        grid.position.y = -3;
-        scene.add(grid);
+    const tx=await contract.buyTokens({value:ethers.utils.parseEther(amount)});
+    const receipt=await tx.wait();
 
-        const ringGeometry = new THREE.TorusGeometry(2.8, 0.15, 32, 180);
-        const ringMaterial = new THREE.MeshStandardMaterial({
-          color: 0x00ff66,
-          metalness: 0.7,
-          roughness: 0.2,
-          emissive: 0x00ff66,
-          emissiveIntensity: 0.8,
-        });
-        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-        ring.rotation.x = Math.PI / 2.2;
-        scene.add(ring);
+    alert("✅ Purchase successful!\n\nTX Hash:\n"+receipt.transactionHash);
 
-        const particlesGeometry = new THREE.BufferGeometry();
-        const particleCount = 600;
-        const positions = new Float32Array(particleCount * 3);
-        for (let i = 0; i
-                {
-            const offset = idx * 0.3;
-            cube.position.y = Math.sin(t * 0.9 + offset) * 1.3 + 0.8;
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.015;
-          });
+  }catch(e){
+    console.error(e);
+    alert("❌ Transaction Failed");
+  }
+}
 
-          camera.position.x = Math.sin(t * 0.08) * 1.5;
-          camera.lookAt(0, 0, 0);
+// ---------------- UI COMPONENT ----------------
 
-          renderer.render(scene, camera);
-          frameId = requestAnimationFrame(animate);
-        }
+function App(){
+  const[wallet,setWallet]=useState(null);
+  const[matic,setMatic]=useState("");
+  const[lucy,setLucy]=useState(0);
+  const[loading,setLoading]=useState(false);
 
-        animate();
+  useEffect(()=>{setLucy(matic?matic*RATE:0)},[matic]);
 
-        function handleResize() {
-          const w = window.innerWidth;
-          const h = window.innerHeight;
-          camera.aspect = w / h;
-          camera.updateProjectionMatrix();
-          renderer.setSize(w, h);
-        }
+  async function connect(){
+    const w=await connectWallet();
+    setWallet(w.addr);
+  }
 
-        window.addEventListener("resize", handleResize);
+  async function contribute(e){
+    e.preventDefault();
+    if(!wallet) return alert("Connect wallet first");
+    if(matic<=0) return alert("Invalid Amount");
 
-        return () => {
-          cancelAnimationFrame(frameId);
-          window.removeEventListener("resize", handleResize);
-          mount.removeChild(renderer.domElement);
-          renderer.dispose();
-        };
-      }, []);
+    setLoading(true);
+    await buyTokens(matic);
+    setLoading(false);
+  }
 
-      return React.createElement("div", {
-        ref: mountRef,
-        className: "absolute inset-0 -z-10 pointer-events-none overflow-hidden",
-      });
-    }
+  return (
+    <div class="max-w-3xl mx-auto pt-12 p-6 text-center">
 
-    /* ========== PRESALE PANEL ========== */
+      <h1 class="text-4xl font-extrabold bg-clip-text text-transparent 
+                 bg-gradient-to-r from-green-400 to-yellow-300">
+        LUCIDIFY PRESALE
+      </h1>
+      <p class="mt-2 text-gray-300">Buy $LUCY early — powered by Polygon</p>
 
-    function PresalePanel() {
-      const [account, setAccount] = useState(null);
-      const [networkOk, setNetworkOk] = useState(false);
-      const [status, setStatus] = useState("Disconnected");
-      const [maticAmount, setMaticAmount] = useState("");
-      const [lucyAmount, setLucyAmount] = useState(0);
-      const [isLoading, setIsLoading] = useState(false);
-      const [provider, setProvider] = useState(null);
-      const [signer, setSigner] = useState(null);
-      const [liveEnabled, setLiveEnabled] = useState(false);
-      const [presaleWallet, setPresaleWallet] = useState(DEFAULT_PRESALE_WALLET);
-      const [txHash, setTxHash] = useState(null);
-      const [estimatedGas, setEstimatedGas] = useState(null);
-      const [errorMsg, setErrorMsg] = useState("");
+      <div class="glass mt-8 p-6 rounded-2xl">
 
-      const progressPercent = Math.min((CURRENT_RAISED / PRESALE_TARGET) * 100, 100);
+        <button onclick={connect} 
+          class="w-full py-3 rounded-lg font-bold text-black 
+                 bg-gradient-to-r from-green-400 to-yellow-300">
+          {wallet ? "Connected: "+wallet.slice(0,6)+"..." : "Connect Wallet"}
+        </button>
 
-      useEffect(() => {
-        const amt = parseFloat(maticAmount);
-        if (!isNaN(amt) && amt > 0) {
-          setLucyAmount(amt * RATE);
-        } else {
-          setLucyAmount(0);
-        }
-      }, [maticAmount]);
+        <form onsubmit={contribute} class="mt-5 space-y-4">
 
-      // check for injected wallet on load
-      useEffect(() => {
-        if (window.ethereum) {
-          const p = new ethers.providers.Web3Provider(window.ethereum);
-          setProvider(p);
-        }
-      }, []);
+          <input type="number" min="0" step="0.1"
+            value={matic} onInput={(e)=>setMatic(e.target.value)}
+            class="w-full p-3 rounded-lg bg-black/40 border border-white/20"
+            placeholder="Enter MATIC amount"/>
 
-      async function connectWallet() {
-        try {
-          if (!window.ethereum) {
-            alert("MetaMask / Web3 wallet not found. Please install MetaMask.");
-            return;
-          }
-          setIsLoading(true);
-          setStatus("Connecting...");
-          const p = new ethers.providers.Web3Provider(window.ethereum, "any");
-          await p.send("eth_requestAccounts", []);
-          const s = p.getSigner();
-          const addr = await s.getAddress();
-          const { chainId } = await p.getNetwork();
+          <div class="text-gray-300">
+            You Receive: 
+            <span class="text-yellow-300 font-bold"> {lucy} LUCY</span>
+          </div>
 
-          setProvider(p);
-          setSigner(s);
-          setAccount(addr);
-          setStatus("Connected");
-          setNetworkOk(chainId === 137);
-          setErrorMsg("");
-          // set up simple listener for account / chain changes
-          window.ethereum.on && window.ethereum.on("accountsChanged", (accounts) => {
-            if (accounts && accounts.length) {
-              setAccount(accounts[0]);
-            } else {
-              setAccount(null);
-              setStatus("Disconnected");
-            }
-          });
-          window.ethereum.on && window.ethereum.on("chainChanged", (chainIdHex) => {
-            const numeric = parseInt(chainIdHex, 16);
-            setNetworkOk(numeric === 137);
-          });
-        } catch (err) {
-          console.error(err);
-          setStatus("Connection failed");
-          setErrorMsg(err.message || String(err));
-        } finally {
-          setIsLoading(false);
-        }
-      }
+          <button type="submit" disabled={loading||!wallet}
+            class="w-full py-3 rounded-lg font-bold border border-green-400 
+                   hover:bg-green-400 hover:text-black transition">
+            {loading? "Processing..." : "🚀 Buy LUCY"}
+          </button>
 
-      async function switchToPolygon() {
-        if (!window.ethereum) {
-          alert("No Ethereum provider found.");
-          return;
-        }
-        try {
-          setIsLoading(true);
-          await window.ethereum.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: "0x89" }], // 137
-          });
-          setNetworkOk(true);
-          setErrorMsg("");
-        } catch (switchError) {
-          // This error code indicates that the chain has not been added to MetaMask.
-          if (switchError.code === 4902) {
-            try {
-              await window.ethereum.request({
-                method: "wallet_addEthereumChain",
-                params: [
-                  {
-                    chainId: "0x89",
-                    chainName: "Polygon Mainnet",
-                    nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
-                    rpcUrls: ["https://polygon-rpc.com"],
-                    blockExplorerUrls: ["https://polygonscan.com"],
-                  },
-                ],
-              });
-              setNetworkOk(true);
-            } catch (addError) {
-              console.error(addError);
-              setErrorMsg(addError.message || String(addError));
-            }
-          } else {
-            console.error(switchError);
-            setErrorMsg(switchError.message || String(switchError));
-          }
-        } finally {
-          setIsLoading(false);
-        }
-      }
+        </form>
+      </div>
 
-      // estimate gas for a direct transfer (to presale wallet) if live enabled and inputs valid
-      useEffect(() => {
-        let mounted = true;
-        async function estimate() {
-          setEstimatedGas(null);
-          if (!liveEnabled || !signer || !presaleWallet) return;
-          const amt = parseFloat(maticAmount);
-          if (isNaN(amt) || amt
-                <= 0) return;
-          try {
-            const tx = {
-              to: presaleWallet,
-              value: ethers.utils.parseEther(amt.toString()),
-            };
-            const estimate = await signer.estimateGas(tx);
-            if (!mounted) return;
-            setEstimatedGas(estimate.toString());
-          } catch (err) {
-            console.debug("Gas estimate error:", err);
-            if (mounted) setEstimatedGas(null);
-          }
-        }
-        estimate();
-        return () =>
-                  {
-          mounted = false;
-        };
-      }, [maticAmount, liveEnabled, signer, presaleWallet]);
+      <p class="mt-10 text-xs text-gray-400">
+        Contract Secured · No Mint · Fixed Supply 85M · Deflationary
+      </p>
+    </div>
+  )
+}
 
-      function isValidAddress(addr) {
-        try {
-          return ethers.utils.getAddress(addr);
-        } catch (e) {
-          return false;
-        }
-      }
+// --------- Render App ---------
+ReactDOM.render(<App/>,document.getElementById("root"));
 
-      async function handleContribute(e) {
-        e.preventDefault();
-        setErrorMsg("");
-        setTxHash(null);
-
-        if (!account) {
-          alert("Connect wallet first.");
-          return;
-        }
-        if (!networkOk) {
-          const ok = confirm("You are not on Polygon. Try switching your wallet to Polygon network?");
-          if (ok) await switchToPolygon();
-          return;
-        }
-        const amt = parseFloat(maticAmount);
-        if (isNaN(amt) || amt
-                  <= 0) {
-          alert("Enter a valid MATIC amount.");
-          return;
-        }
-
-        if (liveEnabled) {
-          if (!presaleWallet || !isValidAddress(presaleWallet)) {
-            alert("Please set a valid presale wallet address before enabling live transactions.");
-            return;
-          }
-          if (!signer) {
-            alert("Signer not ready. Reconnect wallet.");
-            return;
-          }
-
-          try {
-            setIsLoading(true);
-            setStatus("Sending transaction...");
-            const tx = {
-              to: presaleWallet,
-              value: ethers.utils.parseEther(amt.toString()),
-            };
-            // send transaction - user will confirm in wallet
-            const sent = await signer.sendTransaction(tx);
-            setTxHash(sent.hash);
-            setStatus("Transaction submitted");
-            // wait for 1 confirmation (optional)
-            await sent.wait(1);
-            setStatus("Transaction confirmed ✅");
-            // note: in production you would update backend / fetch on-chain allocation etc.
-            // update local UI
-            alert("Transaction confirmed. Tx: " + sent.hash);
-            setMaticAmount("");
-          } catch (err) {
-            console.error(err);
-            setErrorMsg(err.message || String(err));
-            setStatus("Transaction failed");
-          } finally {
-            setIsLoading(false);
-          }
-        } else {
-          // demo mode: don't send, only simulate
-          setIsLoading(true);
-          setStatus("Simulating transaction...");
-          setTimeout(() =>
-                    {
-            const simulatedTxHash =
-              "SIMULATED-" + Math.random().toString(36).slice(2, 10).toUpperCase();
-            setTxHash(simulatedTxHash);
-            setStatus("Simulation complete");
-            alert(
-              "✅ Demo Transaction (Simulation Only)\n\n" +
-                "Wallet: " +
-                account +
-                "\nAmount: " +
-                amt +
-                " MATIC\n" +
-                "You would receive: ~" +
-                (amt * RATE).toLocaleString() +
-                " LUCY\n\n" +
-                "To perform a real MATIC transfer, enable 'Live Transfers' and set a valid Presale Wallet address."
-            );
-            setIsLoading(false);
-            setMaticAmount("");
-          }, 900);
-        }
-      }
-
-      const shortAddr = account ? account.slice(0, 6) + "..." + account.slice(-4) : "Not connected";
-
-      return React.createElement(
-        "div",
-        { className: "relative z-10" },
-        React.createElement(
-          "div",
-          {
-            className:
-              "glass-card rounded-3xl p-6 shadow-2xl max-w-md mx-auto hover-glow transition-all duration-300",
-          },
-          // header
-          React.createElement(
-            "div",
-            { className: "flex justify-between items-center mb-4" },
-            React.createElement(
-              "h3",
-              {
-                className:
-                  "text-xl font-bold bg-gradient-to-r from-lucidGreen to-lucidYellow bg-clip-text text-transparent",
-              },
-              "LUCIDIFY Presale"
-            ),
-            React.createElement(
-              "span",
-              {
-                className:
-                  "text-xs px-3 py-1 rounded-full border border-white/20 text-gray-200 backdrop-blur-sm bg-black/30",
-              },
-              "Polygon · Live-ready"
-            )
-          ),
-
-          // progress bar
-          React.createElement(
-            "div",
-            { className: "mb-5" },
-            React.createElement(
-              "div",
-              { className: "flex justify-between text-xs text-gray-300 mb-2" },
-              React.createElement("span", null, "Presale Progress"),
-              React.createElement(
-                "span",
-                { className: "font-mono text-lucidGreen" },
-                progressPercent.toFixed(1),
-                "%"
-              )
-            ),
-            React.createElement(
-              "div",
-              { className: "h-2 bg-black/50 rounded-full overflow-hidden border border-white/10" },
-              React.createElement("div", {
-                className:
-                  "h-full bg-gradient-to-r from-lucidGreen to-lucidYellow transition-all duration-500",
-                style: { width: progressPercent + "%" },
-              })
-            ),
-            React.createElement(
-              "div",
-              { className: "flex justify-between text-xs text-gray-400 mt-1" },
-              React.createElement("span", null, CURRENT_RAISED.toLocaleString(), " LUCY"),
-              React.createElement("span", null, PRESALE_TARGET.toLocaleString(), " LUCY")
-            )
-          ),
-
-          // wallet info
-          React.createElement(
-            "div",
-            { className: "mb-4 text-xs space-y-2 p-3 rounded-xl bg-black/30 border border-white/5" },
-            React.createElement(
-              "div",
-              { className: "flex justify-between items-center" },
-              React.createElement("span", { className: "text-gray-400" }, "Wallet"),
-              React.createElement("span", { className: "font-mono text-xs" }, shortAddr)
-            ),
-            React.createElement(
-              "div",
-              { className: "flex justify-between items-center" },
-              React.createElement("span", { className: "text-gray-400" }, "Status"),
-              React.createElement(
-                "span",
-                {
-                  className:
-                    "text-xs " +
-                    (status === "Connected"
-                      ? "text-emerald-400"
-                      : status === "Transaction failed"
-                      ? "text-red-400"
-                      : "text-yellow-300"),
-                },
-                status
-              )
-            ),
-            React.createElement(
-              "div",
-              { className: "flex justify-between items-center" },
-              React.createElement("span", { className: "text-gray-400" }, "Network"),
-              React.createElement(
-                "span",
-                { className: "text-xs " + (networkOk ? "text-emerald-400" : "text-orange-400") },
-                networkOk ? "Polygon ✓" : "Not Polygon"
-              )
-            )
-          ),
-
-          // connect & network buttons
-          React.createElement(
-            "div",
-            { className: "flex gap-3 mb-4" },
-            React.createElement(
-              "button",
-              {
-                onClick: connectWallet,
-                disabled: isLoading,
-                className:
-                  "flex-1 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-lucidGreen to-lucidYellow text-black shadow-md hover:shadow-xl transition-all duration-200 disabled:opacity-60",
-              },
-              isLoading ? "Connecting..." : account ? "Reconnect / Switch" : "🔗 Connect Wallet"
-            ),
-            React.createElement(
-              "button",
-              {
-                onClick: switchToPolygon,
-                disabled: isLoading,
-                className:
-                  "px-4 py-2 rounded-xl text-sm font-semibold border border-white/20 text-gray-100 bg-black/30 hover:border-lucidGreen transition-all duration-200",
-              },
-              "Switch to Polygon"
-            )
-          ),
-
-          // live toggle & presale wallet input
-          React.createElement(
-            "div",
-            { className: "mb-4 text-xs space-y-2" },
-            React.createElement(
-              "label",
-              { className: "flex items-center gap-3" },
-              React.createElement("input", {
-                type: "checkbox",
-                checked: liveEnabled,
-                onChange: (e) => setLiveEnabled(e.target.checked),
-                className: "w-4 h-4 rounded",
-                title: "Enable real transactions (wallet will prompt)."
-              }),
-              React.createElement("span", null, "Enable Live Transfers (real MATIC tx)")
-            ),
-            React.createElement(
-              "input",
-              {
-                type: "text",
-                placeholder: "Presale wallet / contract address (required for live)",
-                value: presaleWallet,
-                onChange: (e) => setPresaleWallet(e.target.value.trim()),
-                className:
-                  "w-full text-sm px-3 py-2 rounded-xl bg-black/50 border border-white/15 focus:outline-none focus:ring-2 focus:ring-lucidGreen transition-all",
-              }
-            ),
-            React.createElement(
-              "div",
-              { className: "text-[11px] text-gray-400" },
-              "Live transfers require a valid Polygon address and will open your wallet to confirm transactions. Keep small amounts for testing first."
-            )
-          ),
-
-          // contribution form
-          React.createElement(
-            "form",
-            { onSubmit: handleContribute, className: "space-y-4" },
-            React.createElement(
-              "div",
-              null,
-              React.createElement(
-                "label",
-                { className: "block text-xs font-medium text-gray-300 mb-2" },
-                "Amount in MATIC"
-              ),
-              React.createElement("input", {
-                type: "number",
-                step: "0.01",
-                min: "0",
-                value: maticAmount,
-                onChange: (e) => setMaticAmount(e.target.value),
-                className:
-                  "w-full text-sm px-4 py-3 rounded-xl bg-black/50 border border-white/20 focus:outline-none focus:ring-2 focus:ring-lucidGreen transition-all",
-                placeholder: "e.g. 1.5",
-              })
-            ),
-            React.createElement(
-              "div",
-              { className: "flex items-center justify-between text-xs text-gray-400 px-2" },
-              React.createElement("span", null, "Exchange Rate"),
-              React.createElement(
-                "span",
-                { className: "font-mono text-lucidYellow font-semibold" },
-                "1 MATIC = ",
-                RATE,
-                " LUCY"
-              )
-            ),
-            React.createElement(
-              "div",
-              {
-                className:
-                  "flex items-center justify-between text-sm bg-gradient-to-r from-lucidGreen/8 to-lucidYellow/8 px-4 py-3 rounded-xl border border-white/20",
-              },
-              React.createElement("span", { className: "text-gray-300" }, "You receive"),
-              React.createElement(
-                "span",
-                { className: "font-bold text-lucidYellow font-mono text-base" },
-                lucyAmount.toLocaleString(undefined, { maximumFractionDigits: 2 }),
-                " LUCY"
-              )
-            ),
-
-            React.createElement(
-              "div",
-              { className: "text-xs text-gray-400 flex justify-between items-center gap-2" },
-              React.createElement(
-                "div",
-                null,
-                React.createElement("span", null,
-                  estimatedGas ? `Estimated gas: ${estimatedGas}` : "Gas estimate unavailable")
-              ),
-              React.createElement(
-                "div",
-                null,
-                txHash
-                  ? React.createElement("a", {
-                      className: "tx-link",
-                      href:
-                        txHash && txHash.startsWith("0x")
-                          ? `https://polygonscan.com/tx/${txHash}`
-                          : "#",
-                      target: "_blank",
-                      rel: "noopener noreferrer",
-                    }, txHash.startsWith("SIMULATED-") ? txHash : txHash.slice(0, 8) + "..." + txHash.slice(-6))
-                  : null
-              )
-            ),
-
-            React.createElement(
-              "button",
-              {
-                type: "submit",
-                disabled: isLoading || !account,
-                className:
-                  "w-full mt-2 py-3 rounded-xl text-sm font-bold border-2 border-lucidGreen text-lucidGreen hover:bg-lucidGreen hover:text-black transition-all duration-300 disabled:opacity-40",
-              },
-              isLoading ? (liveEnabled ? "Processing..." : "Simulating...") : liveEnabled ? "🚀 Contribute Now (Live)" : "🚀 Simulate Contribution"
-            )
-          ),
-
-          errorMsg
-            ? React.createElement(
-                "div",
-                { className: "mt-3 text-xs text-red-300" },
-                "Error: ",
-                errorMsg
-              )
-            : null,
-
-          React.createElement(
-            "p",
-            {
-              className: "mt-4 text-xs text-gray-500 leading-relaxed text-center",
-            },
-            React.createElement("strong", null, "Security: "),
-            "Always verify contract/wallet addresses and test with small amounts first. This UI supports simulated flows and optional live transfers to a specified wallet."
-          )
-        )
-      );
-    }
-
-    /* ========== MAIN APP ========== */
-
-    function App() {
-      return React.createElement(
-        "div",
-        { className: "relative min-h-screen overflow-hidden" },
-        React.createElement(ThreeBackground, null),
-
-        // soft neon blobs
-        React.createElement("div", {
-          className:
-            "pointer-events-none absolute -top-40 -right-40 w-96 h-96 bg-lucidGreen/20 blur-3xl rounded-full -z-10 animate-pulse",
-        }),
-        React.createElement("div", {
-          className:
-            "pointer-events-none absolute bottom-0 left-0 w-80 h-80 bg-lucidYellow/10 blur-3xl rounded-full -z-10 animate-pulse",
-          style: { animationDelay: "1s" },
-        }),
-
-        React.createElement(
-          "div",
-          { className: "relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10" },
-
-          // NAVBAR
-          React.createElement(
-            "header",
-            {
-              className:
-                "flex items-center justify-between py-3 mb-8 sm:mb-12 glass-card rounded-2xl px-4 sm:px-6 shadow-xl",
-            },
-            React.createElement(
-              "div",
-              { className: "flex items-center gap-3" },
-              React.createElement(
-                "div",
-                {
-                  className:
-                    "w-10 h-10 rounded-xl border-2 border-lucidGreen flex items-center justify-center text-sm font-bold bg-gradient-to-br from-lucidGreen/20 to-lucidYellow/10 shadow-lg",
-                },
-                "LY"
-              ),
-              React.createElement(
-                "div",
-                { className: "leading-tight" },
-                React.createElement(
-                  "div",
-                  {
-                    className:
-                      "text-sm font-bold uppercase tracking-wider bg-gradient-to-r from-lucidGreen to-white bg-clip-text text-transparent",
-                  },
-                  "LUCIDIFY"
-                ),
-                React.createElement(
-                  "div",
-                  { className: "text-xs text-gray-400 hidden sm:block" },
-                  "Lucidify the Future of Finance."
-                )
-              )
-            ),
-            React.createElement(
-              "div",
-              { className: "hidden md:flex items-center gap-3 text-[11px] text-gray-300" },
-              React.createElement(
-                "span",
-                { className: "flex items-center gap-1.5" },
-                React.createElement("span", {
-                  className: "w-2 h-2 rounded-full bg-lucidGreen animate-pulse",
-                }),
-                "Polygon"
-              ),
-              React.createElement("span", null, "Deflationary"),
-              React.createElement("span", null, "Presale · Live-ready")
-            ),
-            React.createElement(
-              "button",
-              {
-                className:
-                  "text-xs sm:text-sm px-4 py-2 rounded-xl border border-lucidGreen/40 bg-black/40 hover:border-lucidGreen hover:bg-lucidGreen/10 transition-all duration-300 font-semibold",
-                onClick: () => {
-                  window.scrollTo({ top: 600, behavior: "smooth" });
-                },
-              },
-              "Launch App"
-            )
-          ),
-
-          // HERO + PRESALE
-          React.createElement(
-            "main",
-            { className: "space-y-12" },
-            React.createElement(
-              "section",
-              {
-                className:
-                  "grid lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] gap-10 items-center",
-              },
-              // left hero
-              React.createElement(
-                "div",
-                { className: "space-y-5" },
-                React.createElement(
-                  "div",
-                  {
-                    className:
-                      "inline-flex items-center gap-2 text-xs px-4 py-2 rounded-full border border-lucidGreen/50 bg-lucidGreen/5 backdrop-blur-sm",
-                  },
-                  React.createElement("span", {
-                    className: "w-2 h-2 rounded-full bg-lucidGreen animate-pulse",
-                  }),
-                  React.createElement(
-                    "span",
-                    { className: "uppercase tracking-wider font-semibold text-gray-200" },
-                    "Presale Live-ready"
-                  )
-                ),
-                React.createElement(
-                  "h1",
-                  {
-                    className:
-                      "text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight",
-                  },
-                  React.createElement(
-                    "span",
-                    {
-                      className:
-                        "bg-gradient-to-r from-lucidGreen via-white to-lucidYellow bg-clip-text text-transparent",
-                    },
-                    "LUCIDIFY (LUCY)"
-                  ),
-                  React.createElement("br"),
-                  React.createElement(
-                    "span",
-                    { className: "text-gray-100 text-3xl sm:text-4xl" },
-                    "A lucid gateway"
-                  ),
-                  React.createElement("br"),
-                  React.createElement(
-                    "span",
-                    { className: "text-gray-300 text-2xl sm:text-3xl" },
-                    "to futuristic DeFi."
-                  )
-                ),
-                React.createElement(
-                  "p",
-                  {
-                    className:
-                      "text-base sm:text-lg text-gray-300 max-w-2xl leading-relaxed",
-                  },
-                  "A deflationary Polygon token with transparent tokenomics, auto-burn mechanics, dynamic tax and anti-whale protections – built for long-term holders, not just hype tourists."
-                ),
-                React.createElement(
-                  "div",
-                  { className: "flex flex-wrap gap-4" },
-                  React.createElement(
-                    "button",
-                    {
-                      className:
-                        "px-6 py-3 rounded-xl text-base font-bold bg-gradient-to-r from-lucidGreen to-lucidYellow text-black shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300",
-                      onClick: () => {
-                        document.querySelector("input[type=number]").focus();
-                      },
-                    },
-                    "🚀 Join Presale"
-                  ),
-                  React.createElement(
-                    "button",
-                    {
-                      className:
-                        "px-6 py-3 rounded-xl text-base font-semibold border-2 border-white/30 text-gray-100 glass-card hover:border-lucidGreen hover:text-lucidGreen transition-all duration-300",
-                    },
-                    "📄 Whitepaper"
-                  )
-                ),
-                React.createElement(
-                  "div",
-                  { className: "grid grid-cols-3 gap-4 pt-4 text-xs" },
-                  React.createElement(
-                    "div",
-                    { className: "glass-card rounded-xl p-3" },
-                    React.createElement(
-                      "div",
-                      { className: "text-gray-400 mb-1" },
-                      "Total Supply"
-                    ),
-                    React.createElement(
-                      "div",
-                      { className: "text-sm font-bold text-white" },
-                      "85M LUCY"
-                    )
-                  ),
-                  React.createElement(
-                    "div",
-                    { className: "glass-card rounded-xl p-3" },
-                    React.createElement(
-                      "div",
-                      { className: "text-gray-400 mb-1" },
-                      "Network"
-                    ),
-                    React.createElement(
-                      "div",
-                      { className: "text-sm font-bold text-lucidGreen" },
-                      "Polygon"
-                    )
-                  ),
-                  React.createElement(
-                    "div",
-                    { className: "glass-card rounded-xl p-3" },
-                    React.createElement(
-                      "div",
-                      { className: "text-gray-400 mb-1" },
-                      "Status"
-                    ),
-                    React.createElement(
-                      "div",
-                      { className: "text-sm font-bold text-lucidYellow" },
-                      "Pre-Launch"
-                    )
-                  )
-                )
-              ),
-              // right = presale panel
-              React.createElement(PresalePanel, null)
-            ),
-
-            // feature cards
-            React.createElement(
-              "section",
-              { className: "grid md:grid-cols-3 gap-6 text-sm" },
-              React.createElement(
-                "div",
-                { className: "glass-card rounded-2xl p-6 hover-glow transition-all duration-300" },
-                React.createElement(
-                  "div",
-                  {
-                    className:
-                      "text-[11px] uppercase tracking-[0.2em] text-lucidYellow mb-2 font-semibold",
-                  },
-                  "Tokenomics"
-                ),
-                React.createElement(
-                  "h3",
-                  { className: "font-semibold mb-2" },
-                  "Deflationary by design."
-                ),
-                React.createElement(
-                  "p",
-                  { className: "text-gray-300" },
-                  "Fixed 85M supply with structured allocations for liquidity, presale, ecosystem, marketing, team and community growth."
-                )
-              ),
-              React.createElement(
-                "div",
-                { className: "glass-card rounded-2xl p-6 hover-glow transition-all duration-300" },
-                React.createElement(
-                  "div",
-                  {
-                    className:
-                      "text-[11px] uppercase tracking-[0.2em] text-lucidYellow mb-2 font-semibold",
-                  },
-                  "Launch Safety"
-                ),
-                React.createElement(
-                  "h3",
-                  { className: "font-semibold mb-2" },
-                  "Controlled and transparent."
-                ),
-                React.createElement(
-                  "p",
-                  { className: "text-gray-300" },
-                  "Trading controls, anti-whale logic and gradual rollout to protect early believers and reduce bot abuse."
-                )
-              ),
-              React.createElement(
-                "div",
-                { className: "glass-card rounded-2xl p-6 hover-glow transition-all duration-300" },
-                React.createElement(
-                  "div",
-                  {
-                    className:
-                      "text-[11px] uppercase tracking-[0.2em] text-lucidYellow mb-2 font-semibold",
-                  },
-                  "Founder"
-                ),
-                React.createElement(
-                  "h3",
-                  { className: "font-semibold mb-2" },
-                  "Builder-led execution."
-                ),
-                React.createElement(
-                  "p",
-                  { className: "text-gray-300" },
-                  "Founded by Syed Ali Hasan Moosavi, Managing Director at Sayanjali Nexus Pvt. Ltd. and developer of the Sayanjali Token (SYJ) ecosystem."
-                )
-              )
-            )
-          ),
-
-          React.createElement(
-            "footer",
-            {
-              className:
-                "mt-10 pt-4 border-t border-white/10 text-[11px] text-gray-400 flex flex-wrap items-center justify-between gap-2",
-            },
-            React.createElement(
-              "span",
-              null,
-              "© ",
-              new Date().getFullYear(),
-              " LUCIDIFY (LUCY). All rights reserved."
-            ),
-            React.createElement(
-              "span",
-              null,
-              "Demo UI – connect to live presale contract before handling real funds."
-            )
-          )
-        )
-      );
-    }
-
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(React.createElement(App));
-                  </script>
-                </body>
-              </html>
+</script>
+</body>
+</html>
