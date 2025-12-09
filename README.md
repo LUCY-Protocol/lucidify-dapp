@@ -38,6 +38,7 @@ Perfect for presale/demo launch pages.
 ---
 
 ## 📂 Repository Structure
+
 lucidify-dapp/
 ├── index.html # Main dApp file
 ├── README.md # Documentation
