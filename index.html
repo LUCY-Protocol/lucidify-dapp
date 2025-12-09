@@ -9,243 +9,132 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
 
     <style>
         :root {
             --neon-green: #00FF66;
             --neon-yellow: #FFD93D;
             --deep-blue: #020617;
-            --accent-blue: #0f172a;
             --glass: rgba(15, 23, 42, 0.7);
         }
 
         html { scroll-behavior: smooth; }
-        body {
-            background-color: var(--deep-blue);
-            color: #ffffff;
-            font-family: 'Space Grotesk', sans-serif;
-            overflow-x: hidden;
-        }
-
+        body { background-color: var(--deep-blue); color: #ffffff; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; }
         .font-sync { font-family: 'Syncopate', sans-serif; }
 
-        /* Cyber Background Mesh */
+        /* Cyber Glow Background */
         .bg-mesh {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            background: 
-                radial-gradient(circle at 15% 20%, rgba(0, 255, 102, 0.08) 0%, transparent 35%),
-                radial-gradient(circle at 85% 80%, rgba(255, 217, 61, 0.08) 0%, transparent 35%),
-                radial-gradient(circle at 50% 50%, #08112b 0%, var(--deep-blue) 100%);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 15% 20%, rgba(0, 255, 102, 0.08) 0%, transparent 35%),
+                        radial-gradient(circle at 85% 80%, rgba(255, 217, 61, 0.08) 0%, transparent 35%),
+                        #020617;
         }
 
-        /* Typography & Buttons */
         .neon-text-green { color: var(--neon-green); text-shadow: 0 0 15px rgba(0, 255, 102, 0.4); }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--neon-green), #00cc52);
-            color: #020617;
-            font-weight: 800;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+
+        /* Buttons */
+        .btn-primary { background: linear-gradient(135deg, var(--neon-green), #00cc52); color: #020617; font-weight: 800; }
         .btn-primary:hover { box-shadow: 0 0 30px var(--neon-green); transform: scale(1.03); }
 
-        .btn-secondary {
-            border: 1px solid var(--neon-yellow);
-            color: var(--neon-yellow);
-            transition: 0.3s ease;
-        }
-        .btn-secondary:hover { background: var(--neon-yellow); color: #020617; box-shadow: 0 0 20px var(--neon-yellow); }
-
-        /* Components */
-        .glass-card {
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: 0.3s ease;
-        }
-        .token-bar { height: 8px; background: #1e293b; border-radius: 10px; overflow: hidden; }
-        .token-bar-fill { height: 100%; background: linear-gradient(90deg, var(--neon-green), var(--neon-yellow)); }
-
-        /* Roadmap Elements */
-        .roadmap-line {
-            background: linear-gradient(180deg, var(--neon-green) 0%, var(--neon-yellow) 50%, transparent 100%);
-        }
-        
-        /* Smooth Entrance Overrides */
-        [data-aos="fade-up"] { transform: translateY(40px); opacity: 0; transition-property: transform, opacity; }
-        [data-aos="fade-up"].aos-animate { transform: translateY(0); opacity: 1; }
+        /* Progress Bar Animation */
+        .progress-container { height: 12px; background: #1e293b; border-radius: 20px; overflow: hidden; position: relative; }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--neon-green), var(--neon-yellow)); transition: width 2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     </style>
 </head>
 <body>
 
     <div class="bg-mesh"></div>
 
-    <nav class="fixed w-full z-50 border-b border-white/5 bg-slate-950/80 backdrop-blur-xl">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-2xl font-bold font-sync neon-text-green tracking-tighter">LUCIDIFY</div>
-            <div class="hidden md:flex space-x-10 text-xs font-bold uppercase tracking-widest">
-                <a href="#about" class="hover:text-[#00FF66] transition">About</a>
-                <a href="#tokenomics" class="hover:text-[#00FF66] transition">Tokenomics</a>
-                <a href="#features" class="hover:text-[#00FF66] transition">Vision</a>
-                <a href="#roadmap" class="hover:text-[#00FF66] transition">Path</a>
-            </div>
-            <button class="btn-primary px-6 py-2 rounded-lg text-[10px] uppercase" onclick="connectWallet()">Connect Wallet</button>
+    <div class="bg-black/50 border-b border-white/5 py-2 overflow-hidden">
+        <div class="flex items-center space-x-12 animate-pulse whitespace-nowrap text-[10px] font-bold tracking-[0.3em] uppercase opacity-60 ml-6">
+            <span>MATIC/USD: $0.84</span> <span>PRESALE: LIVE</span> <span>$LUCY Contract Verified</span> <span>Chain: Polygon PoS</span>
         </div>
+    </div>
+
+    <nav class="sticky top-0 z-50 border-b border-white/5 bg-slate-950/80 backdrop-blur-xl px-6 py-4 flex justify-between items-center">
+        <div class="text-2xl font-bold font-sync neon-text-green tracking-tighter">LUCIDIFY</div>
+        <button class="btn-primary px-6 py-2 rounded-lg text-[10px] uppercase" onclick="connectWallet()">Connect Wallet</button>
     </nav>
 
-    <section class="min-h-screen flex items-center pt-20 px-6">
-        <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-            <div data-aos="fade-right">
-                <div class="inline-flex items-center space-x-2 bg-green-500/10 border border-green-500/20 px-3 py-1 rounded-full mb-8">
-                    <span class="w-2 h-2 bg-[#00FF66] rounded-full animate-ping"></span>
-                    <span class="text-[#00FF66] text-[10px] font-bold uppercase tracking-tighter">Ecosystem V1.0 Launch</span>
-                </div>
-                <h1 class="text-6xl md:text-7xl font-bold font-sync leading-none mb-6 tracking-tighter">
-                    LUCID <br/> <span class="neon-text-green">GATEWAY</span> TO <br/> DEFI
-                </h1>
-                <p class="text-slate-400 text-lg mb-10 max-w-md leading-relaxed">
-                    $LUCY is a high-speed deflationary protocol on Polygon, designed to bring absolute transparency to modern finance.
-                </p>
-                <div class="flex flex-wrap gap-5">
-                    <a href="#presale" class="btn-primary px-10 py-4 rounded-xl">Join Presale</a>
-                    <a href="#" class="btn-secondary px-10 py-4 rounded-xl">Whitepaper</a>
-                </div>
+    <section class="max-w-7xl mx-auto px-6 py-12" data-aos="fade-up">
+        <div class="glass-card p-8 rounded-3xl grid md:grid-cols-3 gap-8 items-center border border-white/10">
+            <div>
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Presale Progress</p>
+                <h3 class="text-3xl font-sync"><span id="raisedMatic">0</span> / 50k <span class="text-xs text-slate-400 font-sans tracking-normal">MATIC</span></h3>
             </div>
-            <div class="relative flex justify-center" data-aos="zoom-in">
-                <div class="w-80 h-80 md:w-[500px] md:h-[500px] rounded-full glass-card border border-white/10 flex items-center justify-center">
-                    <div class="text-center">
-                         <div class="text-9xl font-bold opacity-10 font-sync absolute inset-0 flex items-center justify-center select-none tracking-widest">LUCY</div>
-                         <i data-lucide="shield-check" size="84" class="text-[#00FF66] drop-shadow-[0_0_15px_#00FF66] animate-pulse"></i>
-                    </div>
-                </div>
+            <div class="progress-container md:col-span-2 shadow-[0_0_15px_rgba(0,255,102,0.1)]">
+                <div id="progressBar" class="progress-fill"></div>
             </div>
         </div>
     </section>
 
-    <section id="features" class="py-24 px-6 bg-slate-900/20">
-        <div class="max-w-7xl mx-auto">
-            <h2 class="text-3xl font-sync mb-16 text-center" data-aos="fade-up">Elite <span class="neon-text-green">Vision</span></h2>
-            <div class="grid md:grid-cols-4 gap-6">
-                <div class="glass-card p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="0">
-                    <i data-lucide="zap" class="text-[#00FF66] mb-4"></i>
-                    <h4 class="text-xl font-bold mb-2 tracking-tight">Auto-Burn</h4>
-                    <p class="text-sm text-slate-400">Fixed token removal schedule increases scarcity.</p>
-                </div>
-                <div class="glass-card p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="100">
-                    <i data-lucide="lock" class="text-[#00FF66] mb-4"></i>
-                    <h4 class="text-xl font-bold mb-2 tracking-tight">Anti-Whale</h4>
-                    <p class="text-sm text-slate-400">Liquidity limits stop price manipulation.</p>
-                </div>
-                <div class="glass-card p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="200">
-                    <i data-lucide="layers" class="text-[#00FF66] mb-4"></i>
-                    <h4 class="text-xl font-bold mb-2 tracking-tight">Polygon Speed</h4>
-                    <p class="text-sm text-slate-400">Zero-gas transactions on the MATIC chain.</p>
-                </div>
-                <div class="glass-card p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="300">
-                    <i data-lucide="users" class="text-[#00FF66] mb-4"></i>
-                    <h4 class="text-xl font-bold mb-2 tracking-tight">DAO Ready</h4>
-                    <p class="text-sm text-slate-400">Holders govern the vault parameters.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="roadmap" class="py-32 px-6">
-        <div class="max-w-7xl mx-auto relative">
-            <h2 class="text-4xl font-sync mb-24 text-center" data-aos="fade-up">Strategic <span class="neon-text-green">Path</span></h2>
-            <div class="absolute left-6 md:left-1/2 top-48 bottom-12 w-[2px] bg-white/5 md:-translate-x-1/2">
-                <div class="roadmap-line absolute top-0 left-0 w-full h-[60%]"></div>
-            </div>
-
-            <div class="relative flex flex-col md:flex-row items-center mb-24" data-aos="fade-right">
-                <div class="md:w-1/2 text-left md:text-right pr-0 md:pr-16 mb-8 md:mb-0 pl-12 md:pl-0">
-                    <h3 class="text-[#00FF66] font-sync font-bold text-sm mb-4">PHASE 1 - Q1 2025</h3>
-                    <h4 class="text-2xl font-bold mb-2">Genesis Launch</h4>
-                    <p class="text-slate-400">Presale opening and full contract audit completion.</p>
-                </div>
-                <div class="absolute left-6 md:left-1/2 w-4 h-4 rounded-full bg-[#00FF66] -translate-x-1/2 z-10 shadow-[0_0_15px_#00FF66]"></div>
-                <div class="md:w-1/2"></div>
-            </div>
-
-            <div class="relative flex flex-col md:flex-row-reverse items-center mb-24" data-aos="fade-left">
-                <div class="md:w-1/2 text-left pl-12 md:pl-16 mb-8 md:mb-0">
-                    <h3 class="text-[#FFD93D] font-sync font-bold text-sm mb-4">PHASE 2 - Q2 2025</h3>
-                    <h4 class="text-2xl font-bold mb-2">Expansion</h4>
-                    <p class="text-slate-400">Tier-1 DEX listings and community governance portal.</p>
-                </div>
-                <div class="absolute left-6 md:left-1/2 w-4 h-4 rounded-full bg-[#FFD93D] -translate-x-1/2 z-10 shadow-[0_0_15px_#FFD93D]"></div>
-                <div class="md:w-1/2"></div>
-            </div>
-
-            <div class="relative flex flex-col md:flex-row items-center" data-aos="fade-right">
-                <div class="md:w-1/2 text-left md:text-right pr-0 md:pr-16 mb-8 md:mb-0 pl-12 md:pl-0">
-                    <h3 class="text-white opacity-40 font-sync font-bold text-sm mb-4">PHASE 3 - Q3 2025</h3>
-                    <h4 class="text-2xl font-bold mb-2 opacity-50">Utility Vaults</h4>
-                    <p class="text-slate-400 opacity-50">Locked staking pools and dynamic NFT yields.</p>
-                </div>
-                <div class="absolute left-6 md:left-1/2 w-4 h-4 rounded-full bg-slate-700 -translate-x-1/2 z-10"></div>
-                <div class="md:w-1/2"></div>
-            </div>
-        </div>
-    </section>
-
-    <section id="presale" class="py-24 px-6 relative">
+    <section id="presale" class="py-12 px-6">
         <div class="max-w-4xl mx-auto glass-card rounded-[40px] p-10 shadow-2xl overflow-hidden" data-aos="zoom-in">
             <div class="text-center mb-10">
-                <h2 class="text-3xl font-sync mb-2">Protocol <span class="neon-text-green">Entry</span></h2>
-                <p class="text-slate-400 text-sm">Convert MATIC to LUCY Instantly</p>
+                <h2 class="text-3xl font-sync mb-2">Acquire <span class="neon-text-green">LUCY</span></h2>
             </div>
             <div class="grid md:grid-cols-2 gap-12 items-center">
                 <div class="space-y-6">
                     <div class="bg-slate-900/50 p-6 rounded-2xl border border-white/5">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase">You Pay</span>
-                        <input type="number" id="maticInput" placeholder="0.0 MATIC" class="w-full bg-transparent text-2xl font-bold focus:outline-none text-white mt-1">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Input MATIC</span>
+                        <input type="number" id="maticInput" placeholder="10.0" class="w-full bg-transparent text-2xl font-bold focus:outline-none text-white mt-1">
                     </div>
                     <div class="bg-slate-900/50 p-6 rounded-2xl border border-white/5">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase">You Receive</span>
-                        <input type="number" id="lucyOutput" readonly placeholder="0.0 LUCY" class="w-full bg-transparent text-2xl font-bold text-[#00FF66] focus:outline-none mt-1">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Received LUCY</span>
+                        <input type="number" id="lucyOutput" readonly placeholder="100,000" class="w-full bg-transparent text-2xl font-bold text-[#00FF66] focus:outline-none mt-1">
                     </div>
                 </div>
-                <div class="space-y-6 text-center md:text-left">
+                <div class="text-center md:text-left space-y-6">
                     <div class="p-6 rounded-xl bg-[#020617] border border-white/5">
-                        <p class="text-[10px] uppercase text-slate-500 mb-1">Exchange Rate</p>
-                        <p class="text-xl font-bold tracking-widest">1 MATIC = 10,000 LUCY</p>
+                        <p class="text-[10px] uppercase text-slate-500 mb-1">Status</p>
+                        <p id="txStatus" class="text-xs font-bold tracking-widest text-[#FFD93D]">Disconnected</p>
                     </div>
-                    <button class="btn-primary w-full py-5 rounded-2xl font-bold uppercase tracking-widest">Acquire LUCY</button>
+                    <button class="btn-primary w-full py-5 rounded-2xl font-bold uppercase tracking-widest" onclick="connectWallet()">Buy LUCY Tokens</button>
                 </div>
             </div>
         </div>
     </section>
-
-    <footer class="py-16 border-t border-white/5">
-        <div class="max-w-7xl mx-auto px-6 text-center">
-            <h3 class="text-3xl font-sync neon-text-green mb-12">LUCIDIFY</h3>
-            <div class="flex justify-center space-x-12 mb-10 text-slate-500">
-                <a href="#" class="hover:text-white transition">Twitter</a>
-                <a href="#" class="hover:text-white transition">Telegram</a>
-                <a href="#" class="hover:text-white transition">Medium</a>
-            </div>
-            <p class="text-slate-600 text-[10px] tracking-[0.6em] uppercase">© 2025 LUCIDIFY PROTOCOL • Polygon Core</p>
-        </div>
-    </footer>
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script>
         AOS.init({ duration: 1000, easing: 'ease-out-back', once: true });
         lucide.createIcons();
 
-        // Presale Calculator
-        const maticInput = document.getElementById('maticInput');
-        const lucyOutput = document.getElementById('lucyOutput');
-        const rate = 10000;
+        // BLOCKCHAIN CONFIGURATION
+        const targetMatic = 50000; 
+        const raisedMaticPlaceholder = 12500; // Simulated data (Fetch this from contract in production)
 
-        maticInput.addEventListener('input', (e) => {
-            lucyOutput.value = (e.target.value * rate).toFixed(2);
+        function updateProgress(raised) {
+            const percentage = (raised / targetMatic) * 100;
+            document.getElementById('progressBar').style.width = percentage + "%";
+            document.getElementById('raisedMatic').innerText = raised.toLocaleString();
+        }
+
+        // Initialize progress with delay for animation effect
+        setTimeout(() => updateProgress(raisedMaticPlaceholder), 500);
+
+        // UI CALCULATOR
+        const rate = 10000;
+        document.getElementById('maticInput').addEventListener('input', (e) => {
+            document.getElementById('lucyOutput').value = (e.target.value * rate).toLocaleString();
         });
 
-        function connectWallet() {
-            alert("Secure Web3 bridge requested. Please check browser popups.");
+        // WALLET CONNECTION BRIDGE
+        async function connectWallet() {
+            if (window.ethereum) {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    document.getElementById('txStatus').innerText = "Wallet: " + accounts[0].slice(0,6) + "...";
+                    document.getElementById('txStatus').classList.add('text-[#00FF66]');
+                    alert("Wallet Linked! Connection established with Polygon Node.");
+                } catch (error) {
+                    console.error("User denied access");
+                }
+            } else {
+                alert("Please install MetaMask to participate in the presale.");
+            }
         }
     </script>
 </body>
