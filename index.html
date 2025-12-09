@@ -1,141 +1,870 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LUCIDIFY | Future DeFi Protocol</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
-
-    <style>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <title>
+        LUCIDIFY (LUCY) – Lucidify the Future of Finance
+      </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <style>
         :root {
-            --neon-green: #00FF66;
-            --neon-yellow: #FFD93D;
-            --deep-blue: #020617;
-            --glass: rgba(15, 23, 42, 0.7);
+        --bg-dark: #050816;
+        --bg-card: rgba(255, 255, 255, 0.03);
+        --green: #00ff66;
+        --yellow: #ffd93d;
+        --text-main: #ffffff;
+        --text-muted: #c3c3c3;
+        --border-soft: rgba(255, 255, 255, 0.12);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        background: radial-gradient(circle at top, #0b1020 0, #050816 55%, #020308 100%);
+        color: var(--text-main);
+        line-height: 1.6;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        backdrop-filter: blur(12px);
+        background: linear-gradient(to bottom, rgba(5, 8, 22, 0.95), rgba(5, 8, 22, 0.5));
+        border-bottom: 1px solid var(--border-soft);
+      }
+
+      .nav {
+        max-width: 1100px;
+        padding: 0.9rem 1.5rem;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+
+      .logo-mark {
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        border: 1px solid var(--green);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        background: radial-gradient(circle, rgba(0, 255, 102, 0.25), transparent 70%);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 1.25rem;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+      }
+
+      .nav-links a:hover {
+        color: var(--green);
+      }
+
+      .btn {
+        padding: 0.55rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--green), var(--yellow));
+        color: #050816;
+        box-shadow: 0 0 24px rgba(0, 255, 102, 0.35);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 0 32px rgba(0, 255, 102, 0.45);
+      }
+
+      .btn-outline {
+        border-color: var(--border-soft);
+        color: var(--text-main);
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .btn-outline:hover {
+        border-color: var(--green);
+        background: rgba(0, 255, 102, 0.06);
+      }
+
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        padding-bottom: 4rem;
+      }
+
+      section {
+        padding: 3.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2.5fr);
+        gap: 2rem;
+        align-items: center;
+        padding-top: 2.5rem;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 255, 102, 0.4);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        color: var(--green);
+        background: rgba(0, 255, 102, 0.06);
+        margin-bottom: 0.9rem;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.3rem, 3vw + 1rem, 3.2rem);
+        line-height: 1.13;
+        margin-bottom: 1rem;
+      }
+
+      .hero h1 span {
+        background: linear-gradient(135deg, var(--green), var(--yellow));
+        -webkit-background-clip: text;
+        color: transparent;
+      }
+
+      .hero-sub {
+        color: var(--text-muted);
+        max-width: 520px;
+        font-size: 0.98rem;
+        margin-bottom: 1.6rem;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+      }
+
+      .hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
+      .hero-card {
+        border-radius: 1.5rem;
+        border: 1px solid var(--border-soft);
+        background: radial-gradient(circle at top, rgba(0, 255, 102, 0.12), rgba(5, 8, 22, 0.95));
+        padding: 1.4rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero-card::before {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        background: radial-gradient(circle at top, rgba(255, 217, 61, 0.22), transparent 60%);
+        opacity: 0.9;
+        mix-blend-mode: soft-light;
+        pointer-events: none;
+      }
+
+      .hero-card-inner {
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-stat {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-bottom: 0.3rem;
+      }
+
+      .hero-supply {
+        font-weight: 700;
+        font-size: 1.3rem;
+        margin-bottom: 0.7rem;
+      }
+
+      .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+      }
+
+      .pill {
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        background: rgba(5, 8, 22, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--text-muted);
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.2rem;
+      }
+
+      .section-kicker {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--yellow);
+        margin-bottom: 0.4rem;
+      }
+
+      .section-desc {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        max-width: 650px;
+        margin-bottom: 1.8rem;
+      }
+
+      .grid-two {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .card {
+        padding: 1.1rem 1.2rem;
+        border-radius: 1.1rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-soft);
+      }
+
+      .card h3 {
+        font-size: 1rem;
+        margin-bottom: 0.35rem;
+      }
+
+      .card p {
+        font-size: 0.86rem;
+        color: var(--text-muted);
+      }
+
+      .tokenomics-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        font-size: 0.86rem;
+      }
+
+      .tokenomics-item {
+        padding: 0.8rem 0.9rem;
+        border-radius: 0.9rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px dashed rgba(255, 255, 255, 0.12);
+      }
+
+      .tokenomics-item span {
+        display: block;
+        font-weight: 600;
+        color: var(--green);
+        margin-bottom: 0.1rem;
+      }
+
+      .strip {
+        margin-top: 1.6rem;
+        padding: 0.65rem 0.9rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        font-size: 0.78rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+        align-items: center;
+        background: rgba(5, 8, 22, 0.8);
+      }
+
+      .strip b {
+        color: var(--yellow);
+      }
+
+      .timeline {
+        border-left: 1px solid rgba(255, 255, 255, 0.16);
+        padding-left: 1.2rem;
+        margin-top: 0.4rem;
+      }
+
+      .milestone {
+        margin-bottom: 1rem;
+        position: relative;
+      }
+
+      .milestone::before {
+        content: "";
+        position: absolute;
+        left: -1.33rem;
+        top: 0.2rem;
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        border: 2px solid var(--green);
+        background: #050816;
+      }
+
+      .milestone h4 {
+        font-size: 0.9rem;
+        margin-bottom: 0.2rem;
+        color: var(--green);
+      }
+
+      .milestone p {
+        font-size: 0.84rem;
+        color: var(--text-muted);
+      }
+
+      .presale-panel {
+        max-width: 480px;
+        margin-top: 1rem;
+      }
+
+      .presale-stat-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .progress-wrap {
+        margin: 0.7rem 0 1.3rem;
+      }
+
+      .progress-bar {
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        width: 38%;
+        background: linear-gradient(90deg, var(--green), var(--yellow));
+      }
+
+      .team-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 2fr);
+        gap: 1.4rem;
+        font-size: 0.9rem;
+      }
+
+      footer {
+        padding: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-align: center;
+        background: #040611;
+      }
+
+      .footer-top {
+        max-width: 1100px;
+        margin: 0 auto 0.8rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 0.9rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      @media (max-width: 768px) {
+        .hero {
+          grid-template-columns: 1fr;
         }
 
-        html { scroll-behavior: smooth; }
-        body { background-color: var(--deep-blue); color: #ffffff; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; }
-        .font-sync { font-family: 'Syncopate', sans-serif; }
-
-        /* Cyber Glow Background */
-        .bg-mesh {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: radial-gradient(circle at 15% 20%, rgba(0, 255, 102, 0.08) 0%, transparent 35%),
-                        radial-gradient(circle at 85% 80%, rgba(255, 217, 61, 0.08) 0%, transparent 35%),
-                        #020617;
+        .nav {
+          gap: 0.8rem;
         }
 
-        .neon-text-green { color: var(--neon-green); text-shadow: 0 0 15px rgba(0, 255, 102, 0.4); }
-        .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-
-        /* Buttons */
-        .btn-primary { background: linear-gradient(135deg, var(--neon-green), #00cc52); color: #020617; font-weight: 800; }
-        .btn-primary:hover { box-shadow: 0 0 30px var(--neon-green); transform: scale(1.03); }
-
-        /* Progress Bar Animation */
-        .progress-container { height: 12px; background: #1e293b; border-radius: 20px; overflow: hidden; position: relative; }
-        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--neon-green), var(--neon-yellow)); transition: width 2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    </style>
-</head>
-<body>
-
-    <div class="bg-mesh"></div>
-
-    <div class="bg-black/50 border-b border-white/5 py-2 overflow-hidden">
-        <div class="flex items-center space-x-12 animate-pulse whitespace-nowrap text-[10px] font-bold tracking-[0.3em] uppercase opacity-60 ml-6">
-            <span>MATIC/USD: $0.84</span> <span>PRESALE: LIVE</span> <span>$LUCY Contract Verified</span> <span>Chain: Polygon PoS</span>
-        </div>
-    </div>
-
-    <nav class="sticky top-0 z-50 border-b border-white/5 bg-slate-950/80 backdrop-blur-xl px-6 py-4 flex justify-between items-center">
-        <div class="text-2xl font-bold font-sync neon-text-green tracking-tighter">LUCIDIFY</div>
-        <button class="btn-primary px-6 py-2 rounded-lg text-[10px] uppercase" onclick="connectWallet()">Connect Wallet</button>
-    </nav>
-
-    <section class="max-w-7xl mx-auto px-6 py-12" data-aos="fade-up">
-        <div class="glass-card p-8 rounded-3xl grid md:grid-cols-3 gap-8 items-center border border-white/10">
+        .nav-links {
+          display: none;
+        }
+      }
+      </style>
+    </head>
+    <body>
+      <header>
+        <div class="nav">
+          <div class="logo">
+            <div class="logo-mark">
+              LY
+            </div>
             <div>
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Presale Progress</p>
-                <h3 class="text-3xl font-sync"><span id="raisedMatic">0</span> / 50k <span class="text-xs text-slate-400 font-sans tracking-normal">MATIC</span></h3>
+              LUCIDIFY
             </div>
-            <div class="progress-container md:col-span-2 shadow-[0_0_15px_rgba(0,255,102,0.1)]">
-                <div id="progressBar" class="progress-fill"></div>
-            </div>
+          </div>
+          <nav class="nav-links">
+            <a href="#about">
+              About
+            </a>
+            <a href="#tokenomics">
+              Tokenomics
+            </a>
+            <a href="#roadmap">
+              Roadmap
+            </a>
+            <a href="#presale">
+              Presale
+            </a>
+            <a href="#team">
+              Team
+            </a>
+            <a href="#docs">
+              Docs
+            </a>
+          </nav>
+          <button class="btn btn-outline">
+            Launch Dapp
+          </button>
         </div>
-    </section>
-
-    <section id="presale" class="py-12 px-6">
-        <div class="max-w-4xl mx-auto glass-card rounded-[40px] p-10 shadow-2xl overflow-hidden" data-aos="zoom-in">
-            <div class="text-center mb-10">
-                <h2 class="text-3xl font-sync mb-2">Acquire <span class="neon-text-green">LUCY</span></h2>
-            </div>
-            <div class="grid md:grid-cols-2 gap-12 items-center">
-                <div class="space-y-6">
-                    <div class="bg-slate-900/50 p-6 rounded-2xl border border-white/5">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase">Input MATIC</span>
-                        <input type="number" id="maticInput" placeholder="10.0" class="w-full bg-transparent text-2xl font-bold focus:outline-none text-white mt-1">
-                    </div>
-                    <div class="bg-slate-900/50 p-6 rounded-2xl border border-white/5">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase">Received LUCY</span>
-                        <input type="number" id="lucyOutput" readonly placeholder="100,000" class="w-full bg-transparent text-2xl font-bold text-[#00FF66] focus:outline-none mt-1">
-                    </div>
+      </header>
+      <main>
+        <!-- HERO -->
+          <section class="hero" id="home">
+            <div>
+              <div class="badge">
+                Polygon · Deflationary · Next-Gen DeFi
+              </div>
+              <h1>
+                <span>
+                  LUCIDIFY (LUCY)
+                </span>
+                <br />
+                Lucidify the Future of Finance.
+              </h1>
+              <p class="hero-sub">
+                A next-generation Polygon token engineered for transparent tokenomics, controlled launches, and long-term ecosystem growth – with auto-burn, dynamic tax, anti-whale logic, and founder-backed execution.
+              </p>
+              <div class="hero-actions">
+                <button class="btn btn-primary">
+                  Buy on DEX (Soon)
+                </button>
+                <a href="#presale" class="btn btn-outline">
+                  Join Presale
+                </a>
+              </div>
+              <div class="hero-meta">
+                <div>
+                  Deployed on
+                  <b>
+                    Polygon
+                  </b>
                 </div>
-                <div class="text-center md:text-left space-y-6">
-                    <div class="p-6 rounded-xl bg-[#020617] border border-white/5">
-                        <p class="text-[10px] uppercase text-slate-500 mb-1">Status</p>
-                        <p id="txStatus" class="text-xs font-bold tracking-widest text-[#FFD93D]">Disconnected</p>
-                    </div>
-                    <button class="btn-primary w-full py-5 rounded-2xl font-bold uppercase tracking-widest" onclick="connectWallet()">Buy LUCY Tokens</button>
+                <div>
+                  Total Supply:
+                  <b>
+                    85,000,000 LUCY
+                  </b>
                 </div>
+                <div>
+                  Status:
+                  <b>
+                    Pre-Launch
+                  </b>
+                </div>
+              </div>
             </div>
-        </div>
-    </section>
-
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>
-        AOS.init({ duration: 1000, easing: 'ease-out-back', once: true });
-        lucide.createIcons();
-
-        // BLOCKCHAIN CONFIGURATION
-        const targetMatic = 50000; 
-        const raisedMaticPlaceholder = 12500; // Simulated data (Fetch this from contract in production)
-
-        function updateProgress(raised) {
-            const percentage = (raised / targetMatic) * 100;
-            document.getElementById('progressBar').style.width = percentage + "%";
-            document.getElementById('raisedMatic').innerText = raised.toLocaleString();
-        }
-
-        // Initialize progress with delay for animation effect
-        setTimeout(() => updateProgress(raisedMaticPlaceholder), 500);
-
-        // UI CALCULATOR
-        const rate = 10000;
-        document.getElementById('maticInput').addEventListener('input', (e) => {
-            document.getElementById('lucyOutput').value = (e.target.value * rate).toLocaleString();
-        });
-
-        // WALLET CONNECTION BRIDGE
-        async function connectWallet() {
-            if (window.ethereum) {
-                try {
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    document.getElementById('txStatus').innerText = "Wallet: " + accounts[0].slice(0,6) + "...";
-                    document.getElementById('txStatus').classList.add('text-[#00FF66]');
-                    alert("Wallet Linked! Connection established with Polygon Node.");
-                } catch (error) {
-                    console.error("User denied access");
-                }
-            } else {
-                alert("Please install MetaMask to participate in the presale.");
-            }
-        }
-    </script>
-</body>
-</html>
+            <div class="hero-card">
+              <div class="hero-card-inner">
+                <div class="hero-stat">
+                  Token Snapshot
+                </div>
+                <div class="hero-supply">
+                  85,000,000 LUCY
+                </div>
+                <div class="pill-row">
+                  <div class="pill">
+                    Auto-Burn Enabled
+                  </div>
+                  <div class="pill">
+                    Dynamic 3% Tax
+                  </div>
+                  <div class="pill">
+                    Blacklist & Trading Lock
+                  </div>
+                  <div class="pill">
+                    Max Wallet / Max Tx
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- ABOUT -->
+            <section id="about">
+              <div class="section-kicker">
+                About Lucidify
+              </div>
+              <h2 class="section-title">
+                Designed for clarity, built for durability.
+              </h2>
+              <p class="section-desc">
+                LUCIDIFY (LUCY) is a deflationary Polygon-based asset focused on transparent mechanics, risk-managed launches, and long-term ecosystem value. By combining auto-burn, dynamic tax, and anti-whale limits, LUCY is engineered to create sustainable on-chain liquidity and a disciplined growth trajectory.
+              </p>
+              <div class="grid-two">
+                <div class="card">
+                  <h3>
+                    Clear tokenomics
+                  </h3>
+                  <p>
+                    No hidden mints. No surprise supply shocks. LUCY is a fixed-supply token with clearly defined allocations and fully trackable flows to liquidity, marketing, and ecosystem development.
+                  </p>
+                </div>
+                <div class="card">
+                  <h3>
+                    Deploy with control
+                  </h3>
+                  <p>
+                    Trading can be locked or enabled by the owner, with blacklist controls and configurable max wallet / max transaction limits to mitigate early manipulation and bot-driven volatility.
+                  </p>
+                </div>
+              </div>
+            </section>
+            <!-- TOKENOMICS -->
+              <section id="tokenomics">
+                <div class="section-kicker">
+                  Tokenomics
+                </div>
+                <h2 class="section-title">
+                  85 million LUCY, transparently allocated.
+                </h2>
+                <p class="section-desc">
+                  A lean supply structure tuned for price discovery, ecosystem expansion, and long-term community incentives – while avoiding unnecessary inflation or opaque vesting games.
+                </p>
+                <div class="tokenomics-list">
+                  <div class="tokenomics-item">
+                    <span>
+                      35% · Liquidity & DEX Pools
+                    </span>
+                    Primary liquidity on decentralized exchanges, with a portion locked to build market trust.
+                  </div>
+                  <div class="tokenomics-item">
+                    <span>
+                      20% · Ecosystem & Utilities
+                    </span>
+                    Future dApps, staking, integrations and partner incentives within the Lucidify ecosystem.
+                  </div>
+                  <div class="tokenomics-item">
+                    <span>
+                      15% · Presale & Public Sale
+                    </span>
+                    Fair launch access across early believers, with transparent caps and contribution limits.
+                  </div>
+                  <div class="tokenomics-item">
+                    <span>
+                      10% · Marketing & CEX Listings
+                    </span>
+                    Listings, brand campaigns, KOLs and community-building initiatives to support growth.
+                  </div>
+                  <div class="tokenomics-item">
+                    <span>
+                      10% · Team & Advisors (Vested)
+                    </span>
+                    Locked and vested allocations aligned with long-term execution, not short-term exits.
+                  </div>
+                  <div class="tokenomics-item">
+                    <span>
+                      5% · Community Rewards
+                    </span>
+                    Airdrops, quests, loyalty incentives and ongoing engagement programs.
+                  </div>
+                  <div class="tokenomics-item">
+                    <span>
+                      5% · Treasury & Strategic Reserves
+                    </span>
+                    Strategic flexibility for future partnerships, emergency liquidity or expansion.
+                  </div>
+                </div>
+                <div class="strip">
+                  <b>
+                    Core mechanics:
+                  </b>
+                  <span>
+                    Dynamic buy/sell tax (initially 3%)
+                  </span>
+                  <span>
+                    · Auto-burn on every taxed transfer
+                  </span>
+                  <span>
+                    · Configurable max wallet & max tx
+                  </span>
+                  <span>
+                    · Blacklist & trading lock tools for launch safety
+                  </span>
+                </div>
+              </section>
+              <!-- ROADMAP -->
+                <section id="roadmap">
+                  <div class="section-kicker">
+                    Roadmap
+                  </div>
+                  <h2 class="section-title">
+                    From launch to lucid ecosystem.
+                  </h2>
+                  <p class="section-desc">
+                    A phased roadmap focused on clean launch execution, liquidity strength, and the gradual rollout of real utilities – not just temporary narratives.
+                  </p>
+                  <div class="timeline">
+                    <div class="milestone">
+                      <h4>
+                        Phase 1 – Foundation & Launch
+                      </h4>
+                      <p>
+                        Contract deployment, audits, presale, liquidity provisioning, DEX listing and initial brand push.
+                      </p>
+                    </div>
+                    <div class="milestone">
+                      <h4>
+                        Phase 2 – Market Presence
+                      </h4>
+                      <p>
+                        Aggressive marketing, KOL onboarding, CMC & CG listings, community campaigns, early partnerships.
+                      </p>
+                    </div>
+                    <div class="milestone">
+                      <h4>
+                        Phase 3 – Utilities & Staking
+                      </h4>
+                      <p>
+                        Launch of staking, dashboard tools, dApp integrations, and early ecosystem products powered by LUCY.
+                      </p>
+                    </div>
+                    <div class="milestone">
+                      <h4>
+                        Phase 4 – Ecosystem & Expansion
+                      </h4>
+                      <p>
+                        Cross-chain opportunities, advanced DeFi products, potential metaverse / gaming integrations, governance.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+                <!-- PRESALE -->
+                  <section id="presale">
+                    <div class="section-kicker">
+                      Presale
+                    </div>
+                    <h2 class="section-title">
+                      Secure your spot before launch.
+                    </h2>
+                    <p class="section-desc">
+                      The Lucidify presale is structured to prioritize committed holders over short-term speculation, with clear contribution limits and full transparency on allocation and use of funds.
+                    </p>
+                    <div class="card presale-panel">
+                      <div class="presale-stat-row">
+                        <span>
+                          Network
+                        </span>
+                        <span>
+                          <b>
+                            Polygon (MATIC)
+                          </b>
+                        </span>
+                      </div>
+                      <div class="presale-stat-row">
+                        <span>
+                          Presale Allocation
+                        </span>
+                        <span>
+                          <b>
+                            15% · 12,750,000 LUCY
+                          </b>
+                        </span>
+                      </div>
+                      <div class="presale-stat-row">
+                        <span>
+                          Price (example)
+                        </span>
+                        <span>
+                          <b>
+                            1 MATIC = 100 LUCY
+                          </b>
+                        </span>
+                      </div>
+                      <div class="presale-stat-row">
+                        <span>
+                          Soft / Hard Cap
+                        </span>
+                        <span>
+                          <b>
+                            TBA
+                          </b>
+                        </span>
+                      </div>
+                      <div class="presale-stat-row">
+                        <span>
+                          Min / Max Contribution
+                        </span>
+                        <span>
+                          <b>
+                            TBA
+                          </b>
+                        </span>
+                      </div>
+                      <div class="progress-wrap">
+                        <div class="presale-stat-row">
+                          <span>
+                            Progress
+                          </span>
+                          <span>
+                            <b>
+                              38% Filled (demo)
+                            </b>
+                          </span>
+                        </div>
+                        <div class="progress-bar">
+                          <div class="progress-fill">
+                          </div>
+                        </div>
+                      </div>
+                      <button class="btn btn-primary" style="width: 100%;">
+                        Connect Wallet (Coming Soon)
+                      </button>
+                      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.6rem;">
+                        Once the hard cap is reached or the timer expires, presale contributions close and LUCY will be listed with initial liquidity on DEX. Tokens can be claimed from the presale dashboard after launch.
+                      </p>
+                    </div>
+                  </section>
+                  <!-- TEAM -->
+                    <section id="team">
+                      <div class="section-kicker">
+                        Team
+                      </div>
+                      <h2 class="section-title">
+                        Founder-led, execution-focused.
+                      </h2>
+                      <div class="team-grid">
+                        <div>
+                          <p class="section-desc" style="margin-bottom: 0.9rem;">
+                            LUCIDIFY is led by a builder with live experience in token deployment and ecosystem creation, carrying lessons, credibility, and networks forward into the Lucidify stack.
+                          </p>
+                          <div class="card">
+                            <h3>
+                              Founder & Lead Architect
+                            </h3>
+                            <p>
+                              <b>
+                                Syed Ali Hasan Moosavi
+                              </b>
+                            </p>
+                            <p style="font-size: 0.85rem; margin-top: 0.3rem;">
+                              Founder & Managing Director – Sayanjali Nexus Pvt. Ltd.
+                              <br />
+                              Developer of Sayanjali Token (SYJ) and the broader SYJ ecosystem.
+                            </p>
+                          </div>
+                        </div>
+                        <div>
+                          <div class="card">
+                            <h3>
+                              Governance & Transparency
+                            </h3>
+                            <p>
+                              The project is committed to clear communication around contract settings, liquidity decisions, and roadmap execution. As Lucidify matures, governance mechanisms will be evaluated to give the community a more direct voice in future changes.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                    <!-- DOCS -->
+                      <section id="docs">
+                        <div class="section-kicker">
+                          Documentation
+                        </div>
+                        <h2 class="section-title">
+                          Whitepaper & audits.
+                        </h2>
+                        <p class="section-desc">
+                          A full whitepaper outlines token mechanics, allocation logic, roadmap, and risk disclosures. Contract audits and KYC verifications will be published as they are completed.
+                        </p>
+                        <div class="grid-two">
+                          <div class="card">
+                            <h3>
+                              Whitepaper v1.0
+                            </h3>
+                            <p>
+                              Download the Lucidify whitepaper for a structured breakdown of tokenomics, utilities and roadmap.
+                            </p>
+                          </div>
+                          <div class="card">
+                            <h3>
+                              Security & Audits
+                            </h3>
+                            <p>
+                              Third-party smart contract review and liquidity transparency commitments will be shared publicly.
+                            </p>
+                          </div>
+                        </div>
+                      </section>
+                    </main>
+                    <footer>
+                      <div class="footer-top">
+                        <div>
+                          ©
+                          <span id="year">
+                          </span>
+                          LUCIDIFY (LUCY). All rights reserved.
+                        </div>
+                        <div class="footer-links">
+                          <span>
+                            Contract: [to be announced]
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        Built on Polygon · Lucidify the Future of Finance.
+                      </div>
+                    </footer>
+                    <script>
+                      document.getElementById("year").textContent = new Date().getFullYear();
+                    </script>
+                  </body>
