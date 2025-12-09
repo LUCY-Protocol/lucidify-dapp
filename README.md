@@ -39,10 +39,19 @@ Perfect for presale/demo launch pages.
 
 ## 📂 Repository Structure
 
-lucidify-dapp/
-├── index.html # Main dApp file
-├── README.md # Documentation
-└── assets/ # (Optional) logos / tokenomics graphics
+📁 lucidify-dapp/
+│
+├─ 🧩 index.html
+│   └─ Main UI + Wallet Connect + Presale Buy Script
+│
+├─ 📄 README.md
+│   └─ Project overview, installation & deployment guide
+│
+└─ 🖼 assets/  *(optional)*
+    ├─ logo.png
+    ├─ tokenomics.png
+    └─ brand/graphics for website
+
 ---
 ## 🔧 Setup & Run Locally
 
