@@ -1,15 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>LUCIDIFY (LUCY) — Futuristic Presale dApp</title>
 
-<!-- Tailwind (quick utility) -->
+<!-- Tailwind quick utilities (optional but used) -->
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- Libraries -->
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -17,100 +16,113 @@
 
 <style>
   :root{
-    --bg:#050816; --green:#00FF66; --yellow:#FFD93D; --muted:#9fb0c6;
+    --hero-bg:#f8fafc;            /* bright hero background */
+    --card-dark: rgba(6,10,20,0.76);
+    --panel-dark: rgba(5,8,22,0.85);
+    --accent-green: #00FF66;
+    --accent-yellow: #FFD93D;
+    --muted:#9fb0c6;
+    --glass: rgba(255,255,255,0.03);
   }
-  html,body{height:100%;margin:0;background:radial-gradient(circle at 10% 10%, #081027 0, var(--bg) 40%, #020308 100%);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
-  /* layout */
+  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#e6eef7;background:linear-gradient(180deg,#071428 0%, #040612 100%);}
   .site{min-height:100vh;display:flex;flex-direction:column;position:relative;overflow-x:hidden;}
-  header{backdrop-filter:blur(8px);background:linear-gradient(180deg, rgba(5,8,22,0.75), rgba(5,8,22,0.3));border-bottom:1px solid rgba(255,255,255,0.04);position:relative;z-index:50}
-  .nav{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 18px}
-  .logo{display:flex;gap:12px;align-items:center}
-  .logo-mark{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;background:linear-gradient(135deg, rgba(0,255,102,0.12), rgba(255,217,61,0.06));border:1px solid rgba(0,255,102,0.18)}
-  nav a{color:#cbd5e1;margin-left:14px;font-weight:600}
-  .cta{display:flex;gap:10px;align-items:center}
-  .btn-primary{background:linear-gradient(90deg,var(--green),var(--yellow));color:#07101a;padding:10px 14px;border-radius:999px;font-weight:700;box-shadow:0 8px 28px rgba(0,255,102,0.12);border:none}
-  .btn-outline{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.06);color:#e6eef7;background:transparent}
 
-  /* canvas background area */
-  #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
-  main{z-index:20;position:relative;max-width:1200px;margin:0 auto;padding:28px;width:100%}
-  .hero{display:grid;grid-template-columns:1fr 440px;gap:28px;align-items:start;margin-top:24px}
-  .badge{display:inline-flex;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid rgba(0,255,102,0.18);color:var(--green);background:rgba(0,255,102,0.03);font-weight:700;font-size:12px}
-  h1{font-size:clamp(28px,4vw,44px);line-height:1.02;margin:12px 0}
-  h1 .g{background:linear-gradient(90deg,var(--green),white,var(--yellow));-webkit-background-clip:text;color:transparent}
-  p.lead{color:#a9b7c7;max-width:60ch}
-  .meta{display:flex;gap:14px;color:#9fb0c6;margin-top:16px;font-weight:600}
+  /* Soft particle canvas sits behind content */
+  #particlesCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 
-  /* card */
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);border-radius:14px;padding:18px}
-  .token-supply{font-weight:800;color:white;font-size:20px}
-  .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-  .pill{background:rgba(255,255,255,0.02);padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);color:#cfe6d9;font-weight:700;font-size:13px}
+  /* Header */
+  header{position:sticky;top:0;z-index:60;background:linear-gradient(180deg, rgba(2,6,20,0.5), rgba(2,6,20,0.2));backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,0.03)}
+  .nav{max-width:1200px;margin:0 auto;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo-mark{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;background:linear-gradient(135deg, rgba(0,255,102,0.12), rgba(255,217,61,0.06));border:1px solid rgba(0,255,102,0.14);color:#07101a}
+  .navlinks{display:flex;gap:18px;align-items:center;color:var(--muted)}
+  .navlinks a{font-weight:600;color:var(--muted);text-decoration:none}
+  .controls{display:flex;gap:10px;align-items:center}
 
-  /* right column */
-  .right-stack{display:flex;flex-direction:column;gap:18px}
-  .chart-wrap{height:260px}
-  .presale{padding:14px;display:flex;flex-direction:column;gap:12px}
-  .row{display:flex;justify-content:space-between;color:#cbd5e1;font-weight:700}
-  .input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.45);color:#fff}
-  .buy-btn{background:linear-gradient(90deg,var(--green),var(--yellow));padding:10px;border-radius:10px;font-weight:800;border:none;color:#07101a;cursor:pointer}
+  .btn-primary{background:linear-gradient(90deg,var(--accent-green),var(--accent-yellow));color:#07101a;padding:9px 14px;border-radius:999px;border:none;font-weight:800;cursor:pointer;box-shadow:0 8px 30px rgba(0,255,102,0.08)}
+  .btn-ghost{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.04);color:var(--muted);background:transparent;cursor:pointer}
 
-  /* features */
-  .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:30px}
-  .feature{padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.01)}
-  .ft-title{font-weight:800;color:var(--green);margin-bottom:6px}
+  main{position:relative;z-index:10;max-width:1200px;margin:0 auto;padding:28px;width:100%}
 
-  /* roadmap */
-  .roadmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:10px}
+  /* HERO (bright) */
+  .hero-wrap{display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:center;margin-top:22px;background:var(--hero-bg);border-radius:14px;padding:28px;box-shadow:0 10px 40px rgba(2,6,23,0.5)}
+  .hero-left{color:#021428}
+  .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid rgba(0,0,0,0.06);background:linear-gradient(90deg, rgba(0,255,102,0.06), rgba(255,217,61,0.03));color:#053020;font-weight:700;font-size:13px}
+  h1{font-size:clamp(28px,4vw,44px);margin:16px 0;line-height:1.02}
+  h1 .brand-title{background:linear-gradient(90deg,var(--accent-green),#fff,var(--accent-yellow));-webkit-background-clip:text;color:transparent}
+  p.lead{color:#234;max-width:60ch;font-size:16px}
+  .hero-meta{display:flex;gap:16px;margin-top:16px;color:#0b2b2a;font-weight:700}
 
-  footer{padding:22px;color:#bcd0df;border-top:1px solid rgba(255,255,255,0.03);text-align:center}
+  /* hero right panel (dark) */
+  .hero-card{background:var(--panel-dark);border-radius:12px;padding:18px;color:#dfffe3;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+  .supply{font-weight:900;font-size:20px}
+  .pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .pill{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);font-weight:700;color:var(--muted)}
 
-  /* TOASTS (top-right) */
-  .toast-wrap{position:fixed;top:18px;right:18px;z-index:1000;display:flex;flex-direction:column;gap:10px;pointer-events:none}
-  .toast{min-width:260px;padding:12px 14px;border-radius:10px;color:#07101a;font-weight:700;display:flex;align-items:center;gap:10px;pointer-events:auto;box-shadow:0 8px 24px rgba(2,6,23,0.6)}
-  .toast.success{background:linear-gradient(90deg,var(--green),#9cffb8);}
-  .toast.warn{background:linear-gradient(90deg,var(--yellow),#ffe59a);}
-  .toast.error{background:linear-gradient(90deg,#ff6b6b,#ffb3b3);}
+  /* layout sections (dark) */
+  section.content{margin-top:28px;padding:28px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 18px 60px rgba(1,6,10,0.55)}
+  .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+  .card{background:var(--card-dark);padding:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
 
-  /* History Sidebar (hidden until slide-in on new tx) */
-  .history-trigger{position:fixed;right:18px;bottom:18px;z-index:900}
-  .history-button{background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.06);padding:10px 12px;border-radius:999px;color:#cfe6d9;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
-  .history-panel{position:fixed;right:-420px;top:80px;width:380px;max-width:92vw;bottom:18px;background:linear-gradient(180deg, rgba(2,6,23,0.95), rgba(3,8,18,0.95));border-radius:12px;border:1px solid rgba(255,255,255,0.04);padding:14px;z-index:999;box-shadow:0 20px 60px rgba(2,6,23,0.7);display:flex;flex-direction:column;gap:10px}
+  /* tokenomics chart area */
+  .tokenomics-panel{display:flex;gap:18px;align-items:center}
+  .chart-wrap{width:300px;height:260px}
+  .alloc-list{display:flex;flex-direction:column;gap:8px;width:100%}
+  .alloc-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.03)}
+  .alloc-item strong{color:var(--accent-green)}
+
+  /* presale panel */
+  .presale-panel{width:100%;max-width:420px}
+  .presale .row{display:flex;justify-content:space-between;color:var(--muted);font-weight:700}
+  .input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(0,0,0,0.45);color:#fff;margin-top:8px}
+  .buy-btn{background:linear-gradient(90deg,var(--accent-green),var(--accent-yellow));padding:10px;border-radius:10px;border:none;color:#07101a;font-weight:800;cursor:pointer;margin-top:10px}
+
+  /* road, team etc */
+  .kicker{color:var(--accent-yellow);font-weight:800;margin-bottom:6px}
+  h2.section-title{font-size:20px;margin:6px 0 12px;color:#e6eef7}
+
+  footer{margin-top:28px;padding:22px;color:var(--muted);text-align:center;border-top:1px solid rgba(255,255,255,0.02)}
+
+  /* toasts and history (top-right and floating) */
+  .toast-wrap{position:fixed;top:18px;right:18px;z-index:1200;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+  .toast{min-width:240px;padding:10px 12px;border-radius:10px;color:#07101a;font-weight:800;display:flex;align-items:center;gap:10px;pointer-events:auto;box-shadow:0 12px 40px rgba(6,8,22,0.6)}
+  .toast.success{background:linear-gradient(90deg,var(--accent-green),#9effb8)}
+  .toast.warn{background:linear-gradient(90deg,var(--accent-yellow),#ffec99)}
+  .toast.error{background:linear-gradient(90deg,#ff7b7b,#ffbdbd)}
+
+  .history-trigger{position:fixed;right:18px;bottom:18px;z-index:1000}
+  .history-btn{background:rgba(0,0,0,0.6);border-radius:999px;padding:10px 12px;border:1px solid rgba(255,255,255,0.04);color:#cfe6d9}
+  .history-panel{position:fixed;right:-420px;top:80px;width:380px;bottom:18px;background:linear-gradient(180deg, rgba(2,8,13,0.96), rgba(3,8,18,0.96));border-radius:12px;padding:14px;z-index:1005;border:1px solid rgba(255,255,255,0.04);box-shadow:0 24px 80px rgba(2,6,20,0.7);display:flex;flex-direction:column;gap:10px}
   .history-panel.open{right:18px}
-  .history-header{display:flex;justify-content:space-between;align-items:center}
-  .history-list{overflow:auto;flex:1;padding-top:6px;display:flex;flex-direction:column;gap:8px}
-  .history-item{padding:10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:6px}
-  .history-item .meta{display:flex;justify-content:space-between;font-weight:700;color:#9fb0c6;font-size:13px}
-  .history-item a{color:var(--green);word-break:break-all}
+  .history-list{overflow:auto;flex:1;display:flex;flex-direction:column;gap:10px;padding-top:6px}
 
   /* responsive */
-  @media (max-width: 980px){
-    .hero{grid-template-columns:1fr;gap:18px}
-    .right-stack{order:2}
-    nav a{display:none}
-    .history-panel{top:auto;bottom:18px;right:-100%;width:92vw;height:60vh}
+  @media (max-width:1000px){
+    .hero-wrap{grid-template-columns:1fr; padding:20px}
+    .navlinks{display:none}
+    .chart-wrap{width:220px;height:200px}
+    .history-panel{top:auto;bottom:18px;right:-102%;width:92vw;height:58vh}
     .history-panel.open{right:18px}
   }
 </style>
 </head>
 <body>
 <div class="site">
-
-  <!-- Background canvas -->
-  <canvas id="bgCanvas"></canvas>
+  <!-- Soft particle background (2D canvas) -->
+  <canvas id="particlesCanvas"></canvas>
 
   <!-- Header -->
   <header>
     <div class="nav">
-      <div class="logo">
+      <div class="brand">
         <div class="logo-mark">LY</div>
         <div>
-          <div style="font-weight:800">LUCIDIFY</div>
-          <div style="font-size:11px;color:#94a6b8">Lucid Gateway — Polygon</div>
+          <div style="font-weight:800;color:#e6eef7">LUCIDIFY</div>
+          <div style="font-size:12px;color:var(--muted)">Lucid Gateway — Polygon</div>
         </div>
       </div>
 
-      <nav class="nav-links">
+      <nav class="navlinks">
         <a href="#about">About</a>
         <a href="#tokenomics">Tokenomics</a>
         <a href="#roadmap">Roadmap</a>
@@ -119,9 +131,9 @@
         <a href="#docs">Docs</a>
       </nav>
 
-      <div class="cta">
-        <a class="btn-outline" href="https://polygonscan.com/token/0x2561452A62374551993e59a71a36F1E06A5AB3fF" target="_blank" style="font-weight:700;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);color:#cfe6d9">Polygonscan</a>
-        <button id="connectBtn" class="btn-primary">Connect Wallet</button>
+      <div class="controls">
+        <a class="btn-ghost" href="https://polygonscan.com/token/0x2561452A62374551993e59a71a36F1E06A5AB3fF" target="_blank">Polygonscan</a>
+        <button class="btn-primary" id="connectBtn">Connect Wallet</button>
       </div>
     </div>
   </header>
@@ -129,428 +141,384 @@
   <!-- Toast container -->
   <div class="toast-wrap" id="toastWrap"></div>
 
-  <!-- History trigger & panel -->
+  <!-- History trigger and panel -->
   <div class="history-trigger">
-    <div class="history-button" id="historyToggle">History</div>
+    <button class="history-btn" id="historyToggle">History</button>
   </div>
-
   <div class="history-panel" id="historyPanel" aria-hidden="true">
-    <div class="history-header">
-      <div style="font-weight:800;color:#cfe6d9">Transaction History</div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:900;color:#cfe6d9">Transaction History</div>
       <div style="display:flex;gap:8px">
-        <button id="clearHistory" class="btn-outline" style="padding:6px 8px;font-size:12px">Clear</button>
-        <button id="closeHistory" class="btn-outline" style="padding:6px 8px;font-size:12px">Close</button>
+        <button class="btn-ghost" id="clearHistory" style="padding:6px 8px;font-size:13px">Clear</button>
+        <button class="btn-ghost" id="closeHistory" style="padding:6px 8px;font-size:13px">Close</button>
       </div>
     </div>
     <div class="history-list" id="historyList" aria-live="polite"></div>
   </div>
 
-  <!-- Main -->
   <main>
 
     <!-- HERO -->
-    <section class="hero">
-      <div>
+    <div class="hero-wrap" role="region" aria-label="Hero">
+      <div class="hero-left">
         <div class="badge">Polygon · Deflationary · Next-Gen DeFi</div>
-        <h1><span class="g">LUCIDIFY (LUCY)</span><br/>Lucidify the Future of Finance</h1>
-        <p class="lead">A disciplined Polygon asset engineered for transparent tokenomics, anti-whale protections, auto-burn mechanics, and long-term ecosystem utility.</p>
+        <h1><span class="brand-title">LUCIDIFY (LUCY)</span><br/>The Lucid Gateway to Futuristic DeFi</h1>
+        <p class="lead">
+          LUCIDIFY (LUCY) is a professional, deflationary Polygon token built for long-term holders and utility. Engineered with transparent tokenomics, on-transfer burn mechanics, anti-whale protections, and a staged roadmap for staking, listings and real DeFi integrations.
+        </p>
 
-        <div class="meta" style="margin-top:18px">
-          <div>Chain: <strong>Polygon</strong></div>
-          <div>Total Supply: <strong>50,000,000 LUCY</strong></div>
-          <div>Status: <strong>Pre-Launch</strong></div>
+        <div class="hero-meta" style="margin-top:14px">
+          <div><strong>Chain:</strong> Polygon</div>
+          <div><strong>Total Supply:</strong> 50,000,000 LUCY</div>
+          <div><strong>Status:</strong> Pre-Launch</div>
         </div>
 
         <div style="margin-top:20px;display:flex;gap:12px">
           <button class="btn-primary" id="ctaBuy">Join Presale</button>
-          <button class="btn-outline" id="downloadWhitepaper">Download Whitepaper</button>
+          <button class="btn-ghost" id="downloadWhitepaper">Download Whitepaper</button>
         </div>
 
-        <!-- features -->
-        <div class="features" style="margin-top:22px">
-          <div class="feature">
-            <div class="ft-title">Auto-Burn</div>
-            <div style="color:#a8bac6;font-weight:600">On-tax burns to reduce supply over time.</div>
+        <div class="grid-3" style="margin-top:22px">
+          <div class="card">
+            <div style="font-weight:900;color:#cfe6d9">Auto-Burn</div>
+            <div style="color:var(--muted);margin-top:6px">A small portion of taxed transfers is burned to create long-term scarcity and align incentives for holders.</div>
           </div>
-          <div class="feature">
-            <div class="ft-title">Low Gas</div>
-            <div style="color:#a8bac6;font-weight:600">Built on Polygon for cheap and fast transactions.</div>
+          <div class="card">
+            <div style="font-weight:900;color:#cfe6d9">Low Gas</div>
+            <div style="color:var(--muted);margin-top:6px">Powered by Polygon — low fees and fast confirmations for users.</div>
           </div>
-          <div class="feature">
-            <div class="ft-title">Anti-Whale</div>
-            <div style="color:#a8bac6;font-weight:600">Max tx and wallet limits to discourage manipulation.</div>
+          <div class="card">
+            <div style="font-weight:900;color:#cfe6d9">Anti-Whale</div>
+            <div style="color:var(--muted);margin-top:6px">Configurable max wallet and max transaction limits to reduce manipulation risks during launch.</div>
           </div>
-          <div class="feature">
-            <div class="ft-title">Community</div>
-            <div style="color:#a8bac6;font-weight:600">Rewards, staking and governance planned for holders.</div>
+          <div class="card">
+            <div style="font-weight:900;color:#cfe6d9">Community</div>
+            <div style="color:var(--muted);margin-top:6px">Roadmap includes staking, rewards, and community governance as the project matures.</div>
           </div>
         </div>
-
       </div>
 
-      <!-- RIGHT - chart + presale -->
-      <aside class="right-stack">
-        <div class="card chart-card">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div style="font-weight:800">Tokenomics</div>
-            <div style="color:#9fb0c6;font-weight:700;font-size:13px">50,000,000 LUCY</div>
-          </div>
-          <div class="chart-wrap" style="margin-top:12px">
-            <canvas id="tokChart"></canvas>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:12px;color:#a8bac6;font-size:13px">
-            <div style="flex:1"><strong>Presale</strong> 15% (7,500,000)</div>
-            <div style="flex:1;text-align:right"><strong>Liquidity</strong> 35% (17,500,000)</div>
-          </div>
+      <aside class="hero-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:900">Presale Snapshot</div>
+          <div style="color:var(--muted);font-weight:700">50,000,000 LUCY</div>
         </div>
 
-        <div class="card presale">
-          <div style="font-weight:800">Presale Panel</div>
-          <div style="color:#9fb0c6;font-size:13px">Contract: <a href="https://polygonscan.com/token/0x2561452A62374551993e59a71a36F1E06A5AB3fF" target="_blank" style="color:var(--green)">0x2561452A62374551993e59a71a36F1E06A5AB3fF</a></div>
+        <div style="margin-top:12px" class="pill-row">
+          <div class="pill">Auto-Burn</div>
+          <div class="pill">Blacklist & Lock</div>
+          <div class="pill">Max Wallet</div>
+        </div>
 
-          <div style="margin-top:8px" class="row"><div>Network</div><div id="network">—</div></div>
+        <div style="margin-top:14px" class="presale-panel">
+          <div class="row"><div>Contract</div><div style="color:var(--accent-green);font-weight:800"><a href="https://polygonscan.com/token/0x2561452A62374551993e59a71a36F1E06A5AB3fF" target="_blank" style="color:inherit">0x2561...AB3fF</a></div></div>
+          <div class="row" style="margin-top:8px"><div>Network</div><div id="network">—</div></div>
           <div class="row"><div>Wallet</div><div id="wallet">Not connected</div></div>
-          <div class="row"><div>Rate</div><div id="rateLabel">1 MATIC = <strong id="rateToken">100</strong> LUCY</div></div>
+          <div class="row" style="margin-top:8px"><div>Rate</div><div id="rateLabel">1 MATIC = <strong id="rateToken">100</strong> LUCY</div></div>
 
-          <input id="matic" class="input" type="number" placeholder="Enter MATIC amount (e.g. 1.5)" step="0.01" />
+          <input id="matic" class="input" type="number" placeholder="Enter MATIC (e.g. 1.5)" step="0.01" />
+          <div style="display:flex;justify-content:space-between;margin-top:8px"><div style="color:var(--muted)">You receive</div><div style="color:var(--accent-yellow);font-weight:900" id="youGet">0 LUCY</div></div>
+          <button id="buyNow" class="buy-btn">Buy (via Contract)</button>
 
-          <div style="display:flex;justify-content:space-between;margin-top:6px">
-            <div style="color:#9fb0c6">You receive</div>
-            <div style="font-weight:800;color:var(--yellow)" id="youGet">0 LUCY</div>
-          </div>
-
-          <button id="buyNow" class="buy-btn" style="margin-top:10px">Buy (via Contract)</button>
-
-          <div style="margin-top:10px;font-size:13px;color:#9fb0c6">
-            Progress: <span id="progressPercent">45%</span>
-            <div class="progress-bar" style="margin-top:6px"><div class="progress-fill" id="progressFill" style="width:45%"></div></div>
+          <div style="margin-top:12px;color:var(--muted);font-size:13px">Progress: <span id="progressPercent">45%</span>
+            <div style="margin-top:8px;background:rgba(255,255,255,0.02);height:8px;border-radius:999px;overflow:hidden"><div id="progressFill" style="width:45%;height:100%;background:linear-gradient(90deg,var(--accent-green),var(--accent-yellow));"></div></div>
           </div>
         </div>
-
       </aside>
-    </section>
+    </div>
 
-    <!-- tokenomics detailed -->
-    <section id="tokenomics" style="margin-top:24px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
-        <div>
-          <div style="color:var(--yellow);font-weight:800">Tokenomics</div>
-          <h2 style="font-size:20px;margin-top:8px">Distribution of the 50M LUCY Supply</h2>
-          <p style="color:#a8bac6;max-width:60ch;margin-top:8px">Detailed breakdown of allocations and special reserves.</p>
+    <!-- TOKENOMICS & CHART -->
+    <section id="tokenomics" class="content" aria-labelledby="tokenomics-heading">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+        <div style="flex:1">
+          <div class="kicker">Tokenomics</div>
+          <h2 id="tokenomics-heading" class="section-title">Distribution of the 50,000,000 LUCY Supply</h2>
+          <p style="color:var(--muted)">Clear allocations designed for liquidity, ecosystem growth, and fair distribution. No hidden minting, transparent vesting for team allocations.</p>
+        </div>
+
+        <div style="width:360px">
+          <div class="chart-wrap card" style="display:flex;flex-direction:column;align-items:center;gap:12px">
+            <canvas id="tokChart" style="max-width:260px"></canvas>
+            <div style="font-weight:900;color:var(--muted)">50,000,000 LUCY</div>
+          </div>
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:18px">
-        <div class="card"><strong>35%</strong><div style="color:#9fb0c6">Liquidity — 17,500,000 LUCY</div></div>
-        <div class="card"><strong>20%</strong><div style="color:#9fb0c6">Ecosystem — 10,000,000 LUCY</div></div>
-        <div class="card"><strong>15%</strong><div style="color:#9fb0c6">Presale — 7,500,000 LUCY</div></div>
-        <div class="card"><strong>10%</strong><div style="color:#9fb0c6">Marketing — 5,000,000 LUCY</div></div>
-        <div class="card"><strong>10%</strong><div style="color:#9fb0c6">Team (Vested) — 5,000,000 LUCY</div></div>
-        <div class="card"><strong>5%</strong><div style="color:#9fb0c6">Community Rewards — 2,500,000 LUCY</div></div>
-        <div class="card"><strong>5%</strong><div style="color:#9fb0c6">Treasury — 2,500,000 LUCY</div></div>
+      <div style="display:flex;gap:16px;margin-top:18px;align-items:flex-start">
+        <div style="flex:1" class="alloc-list">
+          <div class="alloc-item"><div><strong>35%</strong> Liquidity</div><div>17,500,000</div></div>
+          <div class="alloc-item"><div><strong>20%</strong> Ecosystem</div><div>10,000,000</div></div>
+          <div class="alloc-item"><div><strong>15%</strong> Presale</div><div>7,500,000</div></div>
+          <div class="alloc-item"><div><strong>10%</strong> Marketing</div><div>5,000,000</div></div>
+          <div class="alloc-item"><div><strong>10%</strong> Team (vested)</div><div>5,000,000</div></div>
+          <div class="alloc-item"><div><strong>5%</strong> Community Rewards</div><div>2,500,000</div></div>
+          <div class="alloc-item"><div><strong>5%</strong> Treasury</div><div>2,500,000</div></div>
+        </div>
       </div>
     </section>
 
-    <!-- roadmap -->
-    <section id="roadmap">
+    <!-- Roadmap -->
+    <section id="roadmap" class="content" style="margin-top:18px">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <div style="color:var(--yellow);font-weight:800">Roadmap</div>
-          <h2 style="font-size:20px;margin-top:8px">From Launch to Ecosystem</h2>
-          <p style="color:#a8bac6;max-width:60ch;margin-top:8px">A phased approach focusing on security, liquidity and utility.</p>
+          <div class="kicker">Roadmap</div>
+          <h2 class="section-title">From Presale to a Living DeFi Ecosystem</h2>
+          <p style="color:var(--muted)">Phased milestones focusing on security, liquidity, listings, and utility rollouts to provide real value to holders.</p>
         </div>
       </div>
 
-      <div class="roadmap" style="margin-top:16px">
-        <div class="card"><strong>Phase 1</strong><div style="color:#9fb0c6">Deployment, Presale, Liquidity, DEX Listing</div></div>
-        <div class="card"><strong>Phase 2</strong><div style="color:#9fb0c6">Marketing, Partnerships, Listings (CMC/CG)</div></div>
-        <div class="card"><strong>Phase 3</strong><div style="color:#9fb0c6">Staking, Tools, Governance</div></div>
-        <div class="card"><strong>Phase 4</strong><div style="color:#9fb0c6">Expansion, Cross-chain & Ecosystem</div></div>
-      </div>
-    </section>
-
-    <!-- team -->
-    <section id="team">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="color:var(--yellow);font-weight:800">Team</div>
-          <h2 style="font-size:20px;margin-top:8px">Founder & Core</h2>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:16px">
-        <div class="card">
-          <h3 style="font-weight:800">Syed Ali Hasan Moosavi</h3>
-          <div style="color:#9fb0c6;margin-top:6px">Founder & Managing Director — Sayanjali Nexus Pvt. Ltd.<br>Developer of SYJ Token & Lucidify ecosystem.</div>
-        </div>
-        <div class="card">
-          <h3 style="font-weight:800">Governance & Transparency</h3>
-          <div style="color:#9fb0c6;margin-top:6px">Open communication on contract settings, liquidity and roadmap. Governance will be phased in as the ecosystem matures.</div>
-        </div>
+      <div class="grid-3" style="margin-top:12px">
+        <div class="card"><strong>Phase 1</strong><div style="color:var(--muted);margin-top:6px">Deployment, presale, liquidity, initial listings</div></div>
+        <div class="card"><strong>Phase 2</strong><div style="color:var(--muted);margin-top:6px">Marketing, partnerships, CMC/CG listings</div></div>
+        <div class="card"><strong>Phase 3</strong><div style="color:var(--muted);margin-top:6px">Staking, dashboards and utility launches</div></div>
+        <div class="card"><strong>Phase 4</strong><div style="color:var(--muted);margin-top:6px">Cross-chain expansion, governance, advanced DeFi integrations</div></div>
       </div>
     </section>
 
-    <!-- docs -->
-    <section id="docs">
+    <!-- Team -->
+    <section id="team" class="content" style="margin-top:18px">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <div style="color:var(--yellow);font-weight:800">Docs</div>
-          <h2 style="font-size:20px;margin-top:8px">Whitepaper & Audit</h2>
+          <div class="kicker">Team</div>
+          <h2 class="section-title">Founder & Core</h2>
+          <p style="color:var(--muted)">Founder-led team with prior token deployment experience and a clear operational playbook.</p>
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:12px">
+      <div class="grid-3" style="margin-top:12px">
         <div class="card">
-          <h3 style="font-weight:800">Whitepaper v1.0</h3>
-          <div style="color:#9fb0c6;margin-top:6px">Download a generated brief whitepaper via the button in the header or hero (PDF).</div>
+          <div style="font-weight:900">Syed Ali Hasan Moosavi</div>
+          <div style="color:var(--muted);margin-top:6px">Founder & Managing Director — Sayanjali Nexus Pvt. Ltd. Developer of SYJ Token and lead developer for LUCIDIFY.</div>
         </div>
         <div class="card">
-          <h3 style="font-weight:800">Audit</h3>
-          <div style="color:#9fb0c6;margin-top:6px">Third-party security audits and liquidity evidence will be published here when available.</div>
+          <div style="font-weight:900">Governance & Ops</div>
+          <div style="color:var(--muted);margin-top:6px">Transparent communication around liquidity, audits and roadmap milestones; governance planned for future phases.</div>
         </div>
+      </div>
+    </section>
+
+    <!-- Docs -->
+    <section id="docs" class="content" style="margin-top:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="kicker">Docs</div>
+          <h2 class="section-title">Whitepaper & Security</h2>
+          <p style="color:var(--muted)">Download a short whitepaper summary and view audits & proofs when available.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="grid-3">
+        <div class="card"><strong>Whitepaper</strong><div style="color:var(--muted);margin-top:6px">Brief whitepaper generator included. Full whitepaper upload supported in repo.</div></div>
+        <div class="card"><strong>Audit</strong><div style="color:var(--muted);margin-top:6px">Third-party audits will be published when completed.</div></div>
       </div>
     </section>
 
   </main>
 
   <footer>
-    © <span id="year"></span> LUCIDIFY (LUCY) · Built on Polygon · Contract: <a href="https://polygonscan.com/token/0x2561452A62374551993e59a71a36F1E06A5AB3fF" target="_blank" style="color:var(--green)">0x2561452A62374551993e59a71a36F1E06A5AB3fF</a>
+    © <span id="year"></span> LUCIDIFY (LUCY) · Built on Polygon · Contract:
+    <a href="https://polygonscan.com/token/0x2561452A62374551993e59a71a36F1E06A5AB3fF" target="_blank" style="color:var(--accent-green)">0x2561452A62374551993e59a71a36F1E06A5AB3fF</a>
   </footer>
 
 </div>
 
 <script>
 /* ===========================
-   Configuration & constants
+   CONFIG
    =========================== */
 const TOTAL_SUPPLY = 50000000;
 const PRESALE_PERCENT = 15;
 const PRESALE_TOKENS = Math.round(TOTAL_SUPPLY * PRESALE_PERCENT / 100); // 7,500,000
-let RATE = 100; // tokens per 1 MATIC (editable UI)
+let RATE = 100; // tokens per 1 MATIC
 const PRESALE_CONTRACT_ADDRESS = "0x2561452A62374551993e59a71a36F1E06A5AB3fF";
 
-/* IMPORTANT:
-   Paste your presale contract ABI (JSON array) below for buy to work on-chain.
-   Example:
-   const PRESALE_ABI = [{ "inputs": [...], "name": "buyTokens", ... }, ...];
-*/
-const PRESALE_ABI = []; // <-- paste ABI here
-
-const buyContractFunctionName = "buyTokens"; // Adjust if your payable function has a different name
+/* Paste ABI here to enable real contract buys */
+const PRESALE_ABI = []; // <-- paste ABI array here
+const buyContractFunctionName = "buyTokens";
 
 /* ===========================
-   Utilities: Toasts
+   UTIL: Toasts
    =========================== */
 const toastWrap = document.getElementById("toastWrap");
 function showToast(type, title, body, timeout=5000){
-  // type: success | warn | error
-  const t = document.createElement("div");
-  t.className = `toast ${type}`;
-  t.innerHTML = `<div style="flex:1"><div style="font-weight:900">${title}</div><div style="font-weight:600;font-size:13px;margin-top:2px">${body}</div></div>
-                 <div style="margin-left:8px;cursor:pointer;font-weight:900;color:rgba(0,0,0,0.6)">✕</div>`;
-  const closeBtn = t.querySelector('div:last-child');
-  closeBtn.addEventListener('click', ()=> removeToast(t));
-  toastWrap.prepend(t);
-  // animate in
-  gsap.fromTo(t, {opacity:0, y:-10}, {opacity:1, y:0, duration:0.35, ease:"power2.out"});
-  const id = setTimeout(()=> removeToast(t), timeout);
-  t.dataset._timeout = id;
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<div style="flex:1"><div style="font-weight:900">${title}</div><div style="font-weight:700;margin-top:6px">${body}</div></div><div style="cursor:pointer;font-weight:900">✕</div>`;
+  const close = el.querySelector('div:last-child');
+  close.addEventListener('click', ()=> removeToast(el));
+  toastWrap.prepend(el);
+  gsap.fromTo(el,{opacity:0,y:-8},{opacity:1,y:0,duration:0.35,ease:'power2.out'});
+  const tId = setTimeout(()=> removeToast(el), timeout);
+  el.dataset.tid = tId;
 }
 function removeToast(node){
   if(!node) return;
-  const id = node.dataset._timeout; if(id) clearTimeout(id);
-  gsap.to(node, {opacity:0, y:-10, duration:0.3, onComplete: ()=> node.remove()});
+  if(node.dataset.tid) clearTimeout(node.dataset.tid);
+  gsap.to(node,{opacity:0,y:-8,duration:0.28,onComplete:()=> node.remove()});
 }
 
 /* ===========================
    Transaction History (localStorage)
    =========================== */
-const HISTORY_KEY = 'lucidify_txs_v1';
-function loadHistory(){
-  try{ const json = localStorage.getItem(HISTORY_KEY); return json ? JSON.parse(json) : []; }
-  catch(e){ console.error("history load failed", e); return []; }
-}
+const HISTORY_KEY = 'lucidify_v2_txhistory';
+function loadHistory(){ try{ return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }catch(e){return [];} }
 function saveHistory(arr){ localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)); }
-function addHistoryItem(item){ // item: {hash, matic, lucy, status, timestamp}
-  const arr = loadHistory();
-  arr.unshift(item); // newest first
-  saveHistory(arr);
-  renderHistory();
-}
-function updateHistoryStatus(hash, newStatus, receipt){
-  const arr = loadHistory();
-  const idx = arr.findIndex(i => i.hash === hash);
-  if(idx >= 0){
-    arr[idx].status = newStatus;
-    arr[idx].receipt = receipt || null;
-    saveHistory(arr);
-    renderHistory();
-  } else {
-    // might be pending in UI, add new
-    addHistoryItem({hash, matic:0, lucy:0, status:newStatus, timestamp:Date.now(), receipt});
-  }
-}
-function clearHistory(){ localStorage.removeItem(HISTORY_KEY); renderHistory(); }
+function addHistory(item){ const arr = loadHistory(); arr.unshift(item); saveHistory(arr); renderHistory(); }
+function updateHistory(hash, status, receipt){ const arr = loadHistory(); const idx = arr.findIndex(x=>x.hash===hash); if(idx>=0){ arr[idx].status=status; arr[idx].receipt = receipt||null; saveHistory(arr); renderHistory(); } }
 
-/* Render panel */
-const historyPanel = document.getElementById("historyPanel");
-const historyList = document.getElementById("historyList");
+/* Render history list */
+const historyPanel = document.getElementById('historyPanel');
+const historyList = document.getElementById('historyList');
 function renderHistory(){
-  const arr = loadHistory();
-  historyList.innerHTML = '';
-  if(arr.length === 0){
-    const empty = document.createElement('div'); empty.style.color = '#9fb0c6'; empty.textContent = 'No transactions yet';
-    historyList.appendChild(empty); return;
-  }
-  arr.forEach(item=>{
-    const div = document.createElement('div'); div.className='history-item';
-    const statusColor = item.status === 'confirmed' ? 'var(--green)' : item.status === 'pending' ? 'var(--yellow)' : '#ff8b8b';
-    const date = new Date(item.timestamp || Date.now()).toLocaleString();
-    div.innerHTML = `
-      <div class="meta"><div style="color:${statusColor}">${item.status.toUpperCase()}</div><div style="color:#9fb0c6">${date}</div></div>
-      <div style="display:flex;justify-content:space-between;gap:8px">
-        <div style="font-weight:800">${item.matic || '—'} MATIC</div>
-        <div style="color:var(--yellow);font-weight:800">${item.lucy || '—'} LUCY</div>
+  const arr = loadHistory(); historyList.innerHTML = '';
+  if(arr.length===0){ const e = document.createElement('div'); e.style.color='var(--muted)'; e.textContent='No transactions yet'; historyList.appendChild(e); return; }
+  arr.forEach(it=>{
+    const box = document.createElement('div'); box.className='card';
+    const date = new Date(it.timestamp||Date.now()).toLocaleString();
+    const statusColor = it.status==='confirmed' ? 'var(--accent-green)' : it.status==='pending' ? 'var(--accent-yellow)' : '#ff8b8b';
+    box.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-weight:900;color:${statusColor}">${(it.status||'pending').toUpperCase()}</div>
+        <div style="font-size:12px;color:var(--muted)">${date}</div>
       </div>
-      <div style="font-size:13px;color:#9fb0c6;word-break:break-all">
-        Tx: ${item.hash ? `<a href="https://polygonscan.com/tx/${item.hash}" target="_blank">${item.hash}</a>` : '—'}
-      </div>
+      <div style="display:flex;justify-content:space-between;gap:8px"><div style="font-weight:900">${it.matic||'—'} MATIC</div><div style="color:var(--accent-yellow);font-weight:900">${it.lucy||'—'} LUCY</div></div>
+      <div style="margin-top:8px;font-size:13px;color:var(--muted);word-break:break-all">Tx: ${it.hash? `<a href="https://polygonscan.com/tx/${it.hash}" target="_blank" style="color:var(--accent-green)">${it.hash}</a>`:'—'}</div>
     `;
-    historyList.appendChild(div);
+    historyList.appendChild(box);
   });
 }
 
-/* Show panel (slide in) */
-function showHistoryPanel(autoClose=false, duration=3000){
-  historyPanel.classList.add('open');
-  historyPanel.setAttribute('aria-hidden','false');
-  gsap.fromTo(historyPanel, {x:60, opacity:0}, {x:0, opacity:1, duration:0.4, ease:"power2.out"});
-  if(autoClose){
-    setTimeout(()=>{ closeHistoryPanel(); }, duration);
-  }
-}
-function closeHistoryPanel(){
-  gsap.to(historyPanel, {x:60, opacity:0, duration:0.33, ease:"power2.in", onComplete: ()=>{
-    historyPanel.classList.remove('open');
-    historyPanel.setAttribute('aria-hidden','true');
-  }});
-}
-
-/* Hook buttons */
+/* History panel control */
 document.getElementById('historyToggle').addEventListener('click', ()=>{
-  if(historyPanel.classList.contains('open')) closeHistoryPanel();
-  else showHistoryPanel(false);
+  if(historyPanel.classList.contains('open')) closeHistory();
+  else openHistory(false);
 });
-document.getElementById('closeHistory').addEventListener('click', closeHistoryPanel);
-document.getElementById('clearHistory').addEventListener('click', ()=>{ if(confirm('Clear all transaction history?')) clearHistory(); });
+document.getElementById('closeHistory').addEventListener('click', closeHistory);
+document.getElementById('clearHistory').addEventListener('click', ()=>{ if(confirm('Clear history?')){ localStorage.removeItem(HISTORY_KEY); renderHistory(); showToast('warn','History','Cleared'); }});
 
-/* Initialize render */
-renderHistory();
-
-/* ===========================
-   Chart.js tokenomics
-   =========================== */
-const ctx = document.getElementById("tokChart").getContext("2d");
-const tokenData = {
-  labels: ["Liquidity 35%","Ecosystem 20%","Presale 15%","Marketing 10%","Team 10%","Rewards 5%","Treasury 5%"],
-  datasets:[{data:[35,20,15,10,10,5,5], backgroundColor:["#00FF66","#4EE1A1","#FFD93D","#FFC972","#9AD1FF","#C6A0FF","#FF9BB2"], borderWidth:0 }]
-};
-const tokChart = new Chart(ctx, { type:'doughnut', data: tokenData, options:{ cutout:'64%', plugins:{ legend:{position:'bottom', labels:{color:'#cfe6d9'}}}}});
+function openHistory(autoClose=false, duration=5000){
+  historyPanel.classList.add('open'); historyPanel.setAttribute('aria-hidden','false');
+  gsap.fromTo(historyPanel,{x:30,opacity:0},{x:0,opacity:1,duration:0.35,ease:'power2.out'});
+  if(autoClose) setTimeout(closeHistory, duration);
+}
+function closeHistory(){ gsap.to(historyPanel,{x:30,opacity:0,duration:0.28,onComplete:()=>{historyPanel.classList.remove('open');historyPanel.setAttribute('aria-hidden','true');}}); }
 
 /* ===========================
-   Receive calculation
+   Tokenomics Chart
    =========================== */
-const maticInput = document.getElementById("matic"), youGet = document.getElementById("youGet"), rateToken = document.getElementById("rateToken");
+const tokCtx = document.getElementById('tokChart').getContext('2d');
+const tokChart = new Chart(tokCtx, {
+  type:'doughnut',
+  data:{
+    labels:['Liquidity 35%','Ecosystem 20%','Presale 15%','Marketing 10%','Team 10%','Rewards 5%','Treasury 5%'],
+    datasets:[{data:[35,20,15,10,10,5,5], backgroundColor:['#00FF66','#4EE1A1','#FFD93D','#FFC972','#9AD1FF','#C6A0FF','#FF9BB2'], borderWidth:0}]
+  },
+  options:{cutout:'64%',plugins:{legend:{display:false}}}
+});
+
+/* Legend (dynamic) */
+(function renderLegend(){
+  const container = document.createElement('div'); container.style.marginTop='8px'; container.style.display='flex'; container.style.gap='8px'; container.style.flexWrap='wrap';
+  const labels = ['Liquidity 35%','Ecosystem 20%','Presale 15%','Marketing 10%','Team 10%','Rewards 5%','Treasury 5%'];
+  const colors = ['#00FF66','#4EE1A1','#FFD93D','#FFC972','#9AD1FF','#C6A0FF','#FF9BB2'];
+  labels.forEach((l,i)=>{ const el = document.createElement('div'); el.style.display='flex'; el.style.alignItems='center'; el.style.gap='8px'; el.style.color='var(--muted)'; el.innerHTML=`<span style="width:12px;height:12px;border-radius:3px;background:${colors[i]};display:inline-block"></span><span style="font-weight:700">${l}</span>`; container.appendChild(el); });
+  document.querySelector('.chart-wrap').appendChild(container);
+})();
+
+/* ===========================
+   Receive calc / inputs
+   =========================== */
+const maticInput = document.getElementById('matic');
+const youGet = document.getElementById('youGet');
+const rateToken = document.getElementById('rateToken');
 rateToken.textContent = RATE;
-function updateReceive(){ const v=parseFloat(maticInput.value); youGet.textContent = (!isNaN(v) && v>0) ? `${(v*RATE).toLocaleString(undefined,{maximumFractionDigits:2})} LUCY` : '0 LUCY'; }
+function updateReceive(){ const v=parseFloat(maticInput.value); youGet.textContent = (!isNaN(v)&&v>0) ? `${(v*RATE).toLocaleString(undefined,{maximumFractionDigits:2})} LUCY` : '0 LUCY'; }
 maticInput.addEventListener('input', updateReceive);
 
 /* ===========================
-   MetaMask / ethers.js
+   MetaMask / ethers integration
    =========================== */
-const connectBtn = document.getElementById("connectBtn"); const walletLabel = document.getElementById("wallet"); const networkLabel = document.getElementById("network");
+const connectBtn = document.getElementById('connectBtn');
+const walletLabel = document.getElementById('wallet');
+const networkLabel = document.getElementById('network');
 let provider, signer, userAddress;
 
 async function connectWallet(){
-  if(!window.ethereum){ showToast('warn','Wallet','MetaMask not detected. Install it.'); return; }
+  if(!window.ethereum){ showToast('warn','Wallet','MetaMask not found'); return; }
   try{
-    provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-    await provider.send("eth_requestAccounts", []);
+    provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+    await provider.send('eth_requestAccounts', []);
     signer = provider.getSigner();
     userAddress = await signer.getAddress();
     walletLabel.textContent = userAddress.slice(0,6)+'...'+userAddress.slice(-4);
     const net = await provider.getNetwork();
-    networkLabel.textContent = net.chainId === 137 ? 'Polygon (137)' : `${net.name} (${net.chainId})`;
+    networkLabel.textContent = net.chainId===137 ? 'Polygon (137)' : `${net.name} (${net.chainId})`;
     connectBtn.textContent = 'Connected';
-    connectBtn.classList.remove('btn-primary'); connectBtn.classList.add('btn-outline');
+    connectBtn.classList.remove('btn-primary'); connectBtn.classList.add('btn-ghost');
     showToast('success','Wallet','Connected: '+userAddress.slice(0,8));
-  }catch(e){ console.error(e); showToast('error','Wallet Error', e.message || e); }
+  }catch(e){
+    console.error(e); showToast('error','Wallet Error', e.message || e);
+  }
 }
 connectBtn.addEventListener('click', connectWallet);
 
 async function ensurePolygon(){
   if(!provider) return false;
   const net = await provider.getNetwork();
-  if(net.chainId === 137) return true;
+  if(net.chainId===137) return true;
   try{
-    await window.ethereum.request({ method: "wallet_switchEthereumChain", params:[{chainId: "0x89"}]});
+    await window.ethereum.request({method:'wallet_switchEthereumChain', params:[{chainId:'0x89'}]});
     return true;
-  }catch(switchError){
-    if(switchError.code === 4902){
+  }catch(switchErr){
+    if(switchErr.code===4902){
       try{
         await window.ethereum.request({ method:'wallet_addEthereumChain', params:[{ chainId:'0x89', chainName:'Polygon Mainnet', nativeCurrency:{name:'MATIC',symbol:'MATIC',decimals:18}, rpcUrls:['https://polygon-rpc.com/'], blockExplorerUrls:['https://polygonscan.com/'] }]});
         return true;
       }catch(e){ console.error(e); return false; }
-    }
-    return false;
+    } return false;
   }
 }
 
 /* ===========================
-   Buy flow with history & toasts
+   Buy flow (with history + toast)
    =========================== */
-const buyBtn = document.getElementById("buyNow");
+const buyBtn = document.getElementById('buyNow');
 async function submitBuy(){
-  if(!window.ethereum){ showToast('error','MetaMask','MetaMask not detected'); return; }
+  if(!window.ethereum){ showToast('error','MetaMask','MetaMask not installed'); return; }
   if(!provider || !signer || !userAddress){ await connectWallet(); if(!userAddress) return; }
-  const ok = await ensurePolygon(); if(!ok){ showToast('warn','Network','Switch to Polygon and try again'); return; }
+  const ok = await ensurePolygon(); if(!ok){ showToast('warn','Network','Please switch to Polygon'); return; }
 
   const maticAmt = parseFloat(maticInput.value);
   if(isNaN(maticAmt) || maticAmt<=0){ showToast('warn','Input','Enter valid MATIC amount'); return; }
 
-  // If ABI empty: provide instructions & abort
-  if(!Array.isArray(PRESALE_ABI) || PRESALE_ABI.length === 0){
-    showToast('warn','ABI Missing','Paste your presale contract ABI into the PRESALE_ABI array in the HTML to enable on-chain buys.');
+  if(!Array.isArray(PRESALE_ABI) || PRESALE_ABI.length===0){
+    showToast('warn','ABI Missing','Paste your presale contract ABI into the PRESALE_ABI variable to enable on-chain buys');
     return;
   }
 
   try{
     const contract = new ethers.Contract(PRESALE_CONTRACT_ADDRESS, PRESALE_ABI, signer);
-    if(typeof contract[buyContractFunctionName] !== 'function'){ showToast('error','ABI Mismatch', `Function "${buyContractFunctionName}" not found in ABI`); return; }
+    if(typeof contract[buyContractFunctionName] !== 'function'){ showToast('error','ABI Mismatch', `Function "${buyContractFunctionName}" not found`); return; }
 
-    // send transaction
     buyBtn.disabled = true; buyBtn.textContent = 'Sending...';
-    showToast('warn','Tx', 'Submitting transaction — check MetaMask', 5000);
+    showToast('warn','Tx','Submitting tx — confirm in MetaMask', 4000);
 
     const value = ethers.utils.parseEther(maticAmt.toString());
-    // send tx
     const tx = await contract[buyContractFunctionName]({ value });
-    // add pending history
-    addHistoryItem({ hash: tx.hash, matic: maticAmt, lucy: (maticAmt*RATE), status:'pending', timestamp: Date.now() });
-    showToast('warn','Tx Sent', `Tx submitted: ${tx.hash}`, 6000);
+    addHistory({hash:tx.hash, matic:maticAmt, lucy: (maticAmt*RATE), status:'pending', timestamp:Date.now()});
+    showToast('warn','Tx Sent', `Tx: ${tx.hash}`, 5000);
 
-    // wait for receipt
+    // wait for confirmation
     const receipt = await tx.wait();
-    // update history
-    updateHistoryStatus(tx.hash, 'confirmed', receipt);
-    showToast('success','Confirmed', `Purchase confirmed — Tx: ${tx.hash}`, 7000);
+    updateHistory(tx.hash, 'confirmed', receipt);
+    showToast('success','Confirmed', `Purchase confirmed — ${tx.hash}`, 6000);
 
-    // slide in history panel because user asked Option C
-    showHistoryPanel(true, 8000); // open and auto-close? Here we keep open but autoClose param set true with 8s; adjust as needed
+    // slide in history because option C
+    openHistory(true, 9000); // auto-close after 9s
   }catch(err){
     console.error(err);
-    const message = err && err.message ? err.message : String(err);
-    showToast('error','Tx Failed', message, 8000);
+    showToast('error','Tx Failed', (err && err.message) ? err.message : String(err), 8000);
+    addHistory({hash: null, matic: maticAmt, lucy: (maticAmt*RATE), status:'failed', timestamp:Date.now()});
   }finally{
     buyBtn.disabled = false; buyBtn.textContent = 'Buy (via Contract)';
   }
@@ -558,30 +526,20 @@ async function submitBuy(){
 buyBtn.addEventListener('click', submitBuy);
 
 /* ===========================
-   If user manually triggers buy in demo (no ABI) — save a demo tx
-   =========================== */
-document.getElementById('ctaBuy').addEventListener('click', ()=>{
-  // just scroll to presale
-  document.getElementById('presale').scrollIntoView({behavior:'smooth', block:'start'});
-});
-
-/* ===========================
-   Whitepaper PDF generation
+   Whitepaper PDF generator (brief)
    =========================== */
 const { jsPDF } = window.jspdf;
-document.getElementById("downloadWhitepaper").addEventListener("click", () => {
+document.getElementById('downloadWhitepaper').addEventListener('click', ()=>{
   const doc = new jsPDF({unit:'pt',format:'a4'});
-  const title = "LUCIDIFY (LUCY) — Whitepaper (Brief)";
-  doc.setFontSize(18); doc.text(title,40,60);
-  doc.setFontSize(12);
-  const body = [
+  doc.setFontSize(18); doc.text('LUCIDIFY (LUCY) — Whitepaper (Brief)',40,60);
+  doc.setFontSize(11);
+  const lines = [
     `Token: LUCIDIFY (LUCY)`,
     `Network: Polygon (MATIC)`,
     `Total Supply: 50,000,000 LUCY`,
     ``,
     `Overview:`,
-    `LUCIDIFY is a deflationary Polygon token with transparent tokenomics, anti-whale protections,`,
-    `auto-burn mechanics and a roadmap towards staking, governance and ecosystem tools.`,
+    `LUCIDIFY is a deflationary token with transparent tokenomics, anti-whale protections, and an auto-burn mechanism.`,
     ``,
     `Tokenomics:`,
     `- Liquidity: 35% (17,500,000 LUCY)`,
@@ -589,100 +547,92 @@ document.getElementById("downloadWhitepaper").addEventListener("click", () => {
     `- Presale: 15% (7,500,000 LUCY)`,
     `- Marketing: 10% (5,000,000 LUCY)`,
     `- Team (vested): 10% (5,000,000 LUCY)`,
-    `- Community Rewards: 5% (2,500,000 LUCY)`,
+    `- Rewards: 5% (2,500,000 LUCY)`,
     `- Treasury: 5% (2,500,000 LUCY)`,
     ``,
-    `Roadmap Highlights:`,
-    `- Phase 1: Launch & presale`,
-    `- Phase 2: Listings & marketing`,
-    `- Phase 3: Staking & utilities`,
-    ``,
-    `Security:`,
-    `Audits & liquidity proofs will be published when available.`
+    `Roadmap: Launch → Listings → Staking → Ecosystem`
   ];
-  let line = 100;
-  body.forEach((t) => { doc.text(t, 40, line); line += 16; });
-  doc.save("Lucidify_Whitepaper_Brief.pdf");
-  showToast('success','Whitepaper','Downloaded (brief)', 4000);
+  let y = 100;
+  lines.forEach(l=>{ doc.text(l, 40, y); y += 16; });
+  doc.save('Lucidify_Whitepaper_Brief.pdf');
+  showToast('success','Whitepaper','Downloaded (brief)',4000);
 });
 
 /* ===========================
-   3D Background (Three.js)
+   Soft particle background (2D optimized)
    =========================== */
-(function(){
-  const canvas = document.getElementById("bgCanvas");
-  const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 1000);
-  camera.position.set(0,6,18);
-
-  // lights
-  scene.add(new THREE.AmbientLight(0xffffff, 0.14));
-  const p1 = new THREE.PointLight(0x00ff66, 1.2, 80); p1.position.set(10,10,10); scene.add(p1);
-  const p2 = new THREE.PointLight(0xffd93d, 0.9, 80); p2.position.set(-10,6,-10); scene.add(p2);
-
-  // neon grid (wireframe)
-  const gridSize = 80;
-  const gridGeo = new THREE.PlaneGeometry(gridSize, gridSize, 80, 80);
-  const edges = new THREE.EdgesGeometry(gridGeo);
-  const gridMat = new THREE.LineBasicMaterial({ color: 0x00ff66, opacity: 0.06, transparent:true });
-  const grid = new THREE.LineSegments(edges, gridMat);
-  grid.rotation.x = -Math.PI/2;
-  grid.position.y = -3;
-  scene.add(grid);
-
-  // ring
-  const ringGeo = new THREE.TorusGeometry(3.2, 0.07, 16, 120);
-  const ringMat = new THREE.MeshStandardMaterial({ color:0x00ff66, emissive:0x00ff66, roughness:0.1, metalness:0.8 });
-  const ring = new THREE.Mesh(ringGeo, ringMat);
-  ring.rotation.x = Math.PI/2.4; ring.position.y = 0.2;
-  scene.add(ring);
-
-  // particles
-  const pCount = 700;
-  const pos = new Float32Array(pCount*3);
-  for(let i=0;i<pCount*3;i++){ pos[i] = (Math.random()-0.5)*60; }
-  const partGeo = new THREE.BufferGeometry(); partGeo.setAttribute('position', new THREE.BufferAttribute(pos,3));
-  const partMat = new THREE.PointsMaterial({ color:0x00ff66, size:0.06, transparent:true, opacity:0.55, blending:THREE.AdditiveBlending });
-  const particles = new THREE.Points(partGeo, partMat);
-  scene.add(particles);
-
-  function onResize(){ renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); }
-  window.addEventListener('resize', onResize); onResize();
-
-  const clock = new THREE.Clock();
-  function animate(){
-    const t = clock.getElapsedTime();
-    ring.rotation.z = t * 0.35;
-    particles.rotation.y = t * 0.02;
-    grid.position.z = Math.sin(t*0.12)*0.9;
-    camera.position.x = Math.sin(t*0.04)*1.2;
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
+(function softParticles(){
+  const canvas = document.getElementById('particlesCanvas');
+  const ctx = canvas.getContext('2d');
+  let w = innerWidth, h = innerHeight;
+  canvas.width = w; canvas.height = h;
+  const particles = [];
+  const count = Math.floor(Math.max(60, Math.min(160, (w*h)/10000)));
+  for(let i=0;i<count;i++){
+    particles.push({
+      x: Math.random()*w,
+      y: Math.random()*h,
+      r: (Math.random()*1.8)+0.4,
+      vx: (Math.random()-0.5)*0.15,
+      vy: (Math.random()-0.5)*0.15,
+      alpha: 0.08 + Math.random()*0.12
+    });
   }
-  animate();
+  function resize(){ w = innerWidth; h = innerHeight; canvas.width = w; canvas.height = h; }
+  window.addEventListener('resize', resize);
+
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    // subtle gradient overlay for depth
+    const g = ctx.createLinearGradient(0,0,0,h);
+    g.addColorStop(0,'rgba(6,10,20,0.0)');
+    g.addColorStop(1,'rgba(3,6,12,0.2)');
+    ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+
+    for(const p of particles){
+      p.x += p.vx; p.y += p.vy;
+      if(p.x < -10) p.x = w+10;
+      if(p.x > w+10) p.x = -10;
+      if(p.y < -10) p.y = h+10;
+      if(p.y > h+10) p.y = -10;
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(0,255,102,${p.alpha})`; // soft green
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // subtle connecting lines for nearby particles (very faint)
+    for(let i=0;i<count;i++){
+      for(let j=i+1;j<count;j++){
+        const a = particles[i], b = particles[j];
+        const dx = a.x-b.x, dy = a.y-b.y;
+        const dist = Math.sqrt(dx*dx+dy*dy);
+        if(dist < 90){
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(0,255,102,${0.01 + (0.04*(90-dist)/90)})`;
+          ctx.lineWidth = 0.6;
+          ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        }
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+  draw();
 })();
 
 /* ===========================
-   GSAP entrance
+   Small entrance animations
    =========================== */
-gsap.from("header", {y:-20, opacity:0, duration:0.8, ease:"power2.out"});
-gsap.from(".hero-left", {x:-20, opacity:0, duration:0.9, delay:0.1});
-gsap.from(".right-stack", {x:20, opacity:0, duration:0.9, delay:0.15});
-gsap.from(".feature", {y:10, opacity:0, stagger:0.08, duration:0.6});
+gsap.from('.hero-wrap',{y:18,opacity:0,duration:0.9,ease:'power3.out'});
+gsap.from('.card',{y:8,opacity:0,stagger:0.06,duration:0.6});
 
 /* ===========================
-   Init page bits
+   Init
    =========================== */
 document.getElementById('year').textContent = new Date().getFullYear();
-
-/* Load existing history on start */
 renderHistory();
-
-/* show a small toast on page load */
-showToast('warn','Demo Mode','ABI empty — paste PRESALE_ABI to enable buys', 6500);
-
+showToast('warn','Demo Mode','ABI is empty — paste PRESALE_ABI to enable buys',6000);
 </script>
 </body>
 </html>
