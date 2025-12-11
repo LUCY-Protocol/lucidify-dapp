@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>LUCIDIFY (LUCY) — Futuristic Presale dApp</title>
 
-<!-- Tailwind for quick styling -->
+<!-- Tailwind (quick utility) -->
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Three.js (3D), GSAP (animation), Chart.js (charts), ethers (web3), jsPDF (pdf) -->
+<!-- Libraries -->
 <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
@@ -17,25 +17,24 @@
 
 <style>
   :root{
-    --bg:#050816; --green:#00FF66; --yellow:#FFD93D; --muted:#bfc7d2;
+    --bg:#050816; --green:#00FF66; --yellow:#FFD93D; --muted:#9fb0c6;
   }
   html,body{height:100%;margin:0;background:radial-gradient(circle at 10% 10%, #081027 0, var(--bg) 40%, #020308 100%);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
   /* layout */
-  .site{min-height:100vh;display:flex;flex-direction:column;}
-  header{backdrop-filter:blur(8px);background:linear-gradient(180deg, rgba(5,8,22,0.7), rgba(5,8,22,0.3));border-bottom:1px solid rgba(255,255,255,0.04)}
-  .nav{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px;}
+  .site{min-height:100vh;display:flex;flex-direction:column;position:relative;overflow-x:hidden;}
+  header{backdrop-filter:blur(8px);background:linear-gradient(180deg, rgba(5,8,22,0.75), rgba(5,8,22,0.3));border-bottom:1px solid rgba(255,255,255,0.04);position:relative;z-index:50}
+  .nav{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 18px}
   .logo{display:flex;gap:12px;align-items:center}
-  .logo-mark{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;background:linear-gradient(135deg, rgba(0,255,102,0.12), rgba(255,217,61,0.08));border:1px solid rgba(0,255,102,0.18)}
+  .logo-mark{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;background:linear-gradient(135deg, rgba(0,255,102,0.12), rgba(255,217,61,0.06));border:1px solid rgba(0,255,102,0.18)}
   nav a{color:#cbd5e1;margin-left:14px;font-weight:600}
   .cta{display:flex;gap:10px;align-items:center}
-  .btn-primary{background:linear-gradient(90deg,var(--green),var(--yellow));color:#07101a;padding:10px 14px;border-radius:999px;font-weight:700;box-shadow:0 6px 24px rgba(0,255,102,0.12);border:none}
-  .btn-outline{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.06);color:#e6eef7}
+  .btn-primary{background:linear-gradient(90deg,var(--green),var(--yellow));color:#07101a;padding:10px 14px;border-radius:999px;font-weight:700;box-shadow:0 8px 28px rgba(0,255,102,0.12);border:none}
+  .btn-outline{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.06);color:#e6eef7;background:transparent}
 
   /* canvas background area */
   #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
-  main{z-index:10;position:relative;max-width:1200px;margin:0 auto;padding:28px;width:100%}
-  .hero{display:grid;grid-template-columns:1fr 440px;gap:28px;align-items:start;margin-top:20px}
-  .hero-left{padding:18px}
+  main{z-index:20;position:relative;max-width:1200px;margin:0 auto;padding:28px;width:100%}
+  .hero{display:grid;grid-template-columns:1fr 440px;gap:28px;align-items:start;margin-top:24px}
   .badge{display:inline-flex;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid rgba(0,255,102,0.18);color:var(--green);background:rgba(0,255,102,0.03);font-weight:700;font-size:12px}
   h1{font-size:clamp(28px,4vw,44px);line-height:1.02;margin:12px 0}
   h1 .g{background:linear-gradient(90deg,var(--green),white,var(--yellow));-webkit-background-clip:text;color:transparent}
@@ -43,7 +42,7 @@
   .meta{display:flex;gap:14px;color:#9fb0c6;margin-top:16px;font-weight:600}
 
   /* card */
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:18px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);border-radius:14px;padding:18px}
   .token-supply{font-weight:800;color:white;font-size:20px}
   .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
   .pill{background:rgba(255,255,255,0.02);padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);color:#cfe6d9;font-weight:700;font-size:13px}
@@ -53,7 +52,7 @@
   .chart-wrap{height:260px}
   .presale{padding:14px;display:flex;flex-direction:column;gap:12px}
   .row{display:flex;justify-content:space-between;color:#cbd5e1;font-weight:700}
-  .input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.4);color:#fff}
+  .input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.45);color:#fff}
   .buy-btn{background:linear-gradient(90deg,var(--green),var(--yellow));padding:10px;border-radius:10px;font-weight:800;border:none;color:#07101a;cursor:pointer}
 
   /* features */
@@ -66,18 +65,38 @@
 
   footer{padding:22px;color:#bcd0df;border-top:1px solid rgba(255,255,255,0.03);text-align:center}
 
+  /* TOASTS (top-right) */
+  .toast-wrap{position:fixed;top:18px;right:18px;z-index:1000;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+  .toast{min-width:260px;padding:12px 14px;border-radius:10px;color:#07101a;font-weight:700;display:flex;align-items:center;gap:10px;pointer-events:auto;box-shadow:0 8px 24px rgba(2,6,23,0.6)}
+  .toast.success{background:linear-gradient(90deg,var(--green),#9cffb8);}
+  .toast.warn{background:linear-gradient(90deg,var(--yellow),#ffe59a);}
+  .toast.error{background:linear-gradient(90deg,#ff6b6b,#ffb3b3);}
+
+  /* History Sidebar (hidden until slide-in on new tx) */
+  .history-trigger{position:fixed;right:18px;bottom:18px;z-index:900}
+  .history-button{background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.06);padding:10px 12px;border-radius:999px;color:#cfe6d9;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+  .history-panel{position:fixed;right:-420px;top:80px;width:380px;max-width:92vw;bottom:18px;background:linear-gradient(180deg, rgba(2,6,23,0.95), rgba(3,8,18,0.95));border-radius:12px;border:1px solid rgba(255,255,255,0.04);padding:14px;z-index:999;box-shadow:0 20px 60px rgba(2,6,23,0.7);display:flex;flex-direction:column;gap:10px}
+  .history-panel.open{right:18px}
+  .history-header{display:flex;justify-content:space-between;align-items:center}
+  .history-list{overflow:auto;flex:1;padding-top:6px;display:flex;flex-direction:column;gap:8px}
+  .history-item{padding:10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:6px}
+  .history-item .meta{display:flex;justify-content:space-between;font-weight:700;color:#9fb0c6;font-size:13px}
+  .history-item a{color:var(--green);word-break:break-all}
+
   /* responsive */
   @media (max-width: 980px){
     .hero{grid-template-columns:1fr;gap:18px}
     .right-stack{order:2}
-    .nav-links{display:none}
+    nav a{display:none}
+    .history-panel{top:auto;bottom:18px;right:-100%;width:92vw;height:60vh}
+    .history-panel.open{right:18px}
   }
 </style>
 </head>
 <body>
 <div class="site">
 
-  <!-- 3D background canvas -->
+  <!-- Background canvas -->
   <canvas id="bgCanvas"></canvas>
 
   <!-- Header -->
@@ -91,14 +110,14 @@
         </div>
       </div>
 
-      <div class="nav-links" style="display:flex;align-items:center">
+      <nav class="nav-links">
         <a href="#about">About</a>
         <a href="#tokenomics">Tokenomics</a>
         <a href="#roadmap">Roadmap</a>
         <a href="#presale">Presale</a>
         <a href="#team">Team</a>
         <a href="#docs">Docs</a>
-      </div>
+      </nav>
 
       <div class="cta">
         <a class="btn-outline" href="https://polygonscan.com/token/0x2561452A62374551993e59a71a36F1E06A5AB3fF" target="_blank" style="font-weight:700;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);color:#cfe6d9">Polygonscan</a>
@@ -107,12 +126,31 @@
     </div>
   </header>
 
+  <!-- Toast container -->
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <!-- History trigger & panel -->
+  <div class="history-trigger">
+    <div class="history-button" id="historyToggle">History</div>
+  </div>
+
+  <div class="history-panel" id="historyPanel" aria-hidden="true">
+    <div class="history-header">
+      <div style="font-weight:800;color:#cfe6d9">Transaction History</div>
+      <div style="display:flex;gap:8px">
+        <button id="clearHistory" class="btn-outline" style="padding:6px 8px;font-size:12px">Clear</button>
+        <button id="closeHistory" class="btn-outline" style="padding:6px 8px;font-size:12px">Close</button>
+      </div>
+    </div>
+    <div class="history-list" id="historyList" aria-live="polite"></div>
+  </div>
+
   <!-- Main -->
   <main>
 
     <!-- HERO -->
     <section class="hero">
-      <div class="hero-left">
+      <div>
         <div class="badge">Polygon · Deflationary · Next-Gen DeFi</div>
         <h1><span class="g">LUCIDIFY (LUCY)</span><br/>Lucidify the Future of Finance</h1>
         <p class="lead">A disciplined Polygon asset engineered for transparent tokenomics, anti-whale protections, auto-burn mechanics, and long-term ecosystem utility.</p>
@@ -168,7 +206,7 @@
 
         <div class="card presale">
           <div style="font-weight:800">Presale Panel</div>
-          <div style="color:#9fb0c6;font-size:13px">Contract: <a href="https://polygonscan.com/token/0x2561452A62374551993e59a71a36F1E06A5AB3fF" target="_blank" style="color:var(--green)">0x2561...AB3fF</a></div>
+          <div style="color:#9fb0c6;font-size:13px">Contract: <a href="https://polygonscan.com/token/0x2561452A62374551993e59a71a36F1E06A5AB3fF" target="_blank" style="color:var(--green)">0x2561452A62374551993e59a71a36F1E06A5AB3fF</a></div>
 
           <div style="margin-top:8px" class="row"><div>Network</div><div id="network">—</div></div>
           <div class="row"><div>Wallet</div><div id="wallet">Not connected</div></div>
@@ -276,132 +314,191 @@
   </main>
 
   <footer>
-    © <span id="year">2025</span> LUCIDIFY (LUCY) · Built on Polygon · Contract: <a href="https://polygonscan.com/token/0x2561452A62374551993e59a71a36F1E06A5AB3fF" target="_blank" style="color:var(--green)">0x2561452A62374551993e59a71a36F1E06A5AB3fF</a>
+    © <span id="year"></span> LUCIDIFY (LUCY) · Built on Polygon · Contract: <a href="https://polygonscan.com/token/0x2561452A62374551993e59a71a36F1E06A5AB3fF" target="_blank" style="color:var(--green)">0x2561452A62374551993e59a71a36F1E06A5AB3fF</a>
   </footer>
 
 </div>
 
 <script>
-/* -------------------------
-   Configuration / Constants
-   ------------------------- */
+/* ===========================
+   Configuration & constants
+   =========================== */
 const TOTAL_SUPPLY = 50000000;
 const PRESALE_PERCENT = 15;
 const PRESALE_TOKENS = Math.round(TOTAL_SUPPLY * PRESALE_PERCENT / 100); // 7,500,000
-const RATE = 100; // 1 MATIC = 100 LUCY (editable)
+let RATE = 100; // tokens per 1 MATIC (editable UI)
 const PRESALE_CONTRACT_ADDRESS = "0x2561452A62374551993e59a71a36F1E06A5AB3fF";
-let PRESALE_ABI = []; // <-- Paste your presale contract ABI here (array). Example: [{...}, {...}]
-/* If your contract method isn't buyTokens, adjust the buyContractFunctionName variable. */
-const buyContractFunctionName = "buyTokens"; // common name; change if your contract differs
 
-/* -------------------------
-   Year update
-   ------------------------- */
-document.getElementById("year").textContent = new Date().getFullYear();
+/* IMPORTANT:
+   Paste your presale contract ABI (JSON array) below for buy to work on-chain.
+   Example:
+   const PRESALE_ABI = [{ "inputs": [...], "name": "buyTokens", ... }, ...];
+*/
+const PRESALE_ABI = []; // <-- paste ABI here
 
-/* -------------------------
-   Chart.js - Tokenomics Donut
-   ------------------------- */
-const ctx = document.getElementById("tokChart").getContext("2d");
-const tokenData = {
-  labels: ["Liquidity 35%", "Ecosystem 20%", "Presale 15%", "Marketing 10%", "Team 10%", "Rewards 5%", "Treasury 5%"],
-  datasets: [{
-    data: [35,20,15,10,10,5,5],
-    backgroundColor: ["#00FF66","#4EE1A1","#FFD93D","#FFC972","#9AD1FF","#C6A0FF","#FF9BB2"],
-    hoverOffset: 6,
-    borderWidth: 0
-  }]
-};
-const tokChart = new Chart(ctx, {
-  type: 'doughnut',
-  data: tokenData,
-  options: {
-    cutout: "64%",
-    plugins: {
-      legend: {position: 'bottom', labels:{color:'#cfe6d9',usePointStyle:true,padding:12}}
-    }
-  }
-});
+const buyContractFunctionName = "buyTokens"; // Adjust if your payable function has a different name
 
-/* -------------------------
-   Calculate receive amount
-   ------------------------- */
-const maticInput = document.getElementById("matic");
-const youGet = document.getElementById("youGet");
-const rateToken = document.getElementById("rateToken");
-rateToken.textContent = RATE;
-function updateReceive(){
-  const val = parseFloat(maticInput.value);
-  if(!isNaN(val) && val>0){
-    const received = val * RATE;
-    youGet.textContent = `${received.toLocaleString(undefined, {maximumFractionDigits:2})} LUCY`;
+/* ===========================
+   Utilities: Toasts
+   =========================== */
+const toastWrap = document.getElementById("toastWrap");
+function showToast(type, title, body, timeout=5000){
+  // type: success | warn | error
+  const t = document.createElement("div");
+  t.className = `toast ${type}`;
+  t.innerHTML = `<div style="flex:1"><div style="font-weight:900">${title}</div><div style="font-weight:600;font-size:13px;margin-top:2px">${body}</div></div>
+                 <div style="margin-left:8px;cursor:pointer;font-weight:900;color:rgba(0,0,0,0.6)">✕</div>`;
+  const closeBtn = t.querySelector('div:last-child');
+  closeBtn.addEventListener('click', ()=> removeToast(t));
+  toastWrap.prepend(t);
+  // animate in
+  gsap.fromTo(t, {opacity:0, y:-10}, {opacity:1, y:0, duration:0.35, ease:"power2.out"});
+  const id = setTimeout(()=> removeToast(t), timeout);
+  t.dataset._timeout = id;
+}
+function removeToast(node){
+  if(!node) return;
+  const id = node.dataset._timeout; if(id) clearTimeout(id);
+  gsap.to(node, {opacity:0, y:-10, duration:0.3, onComplete: ()=> node.remove()});
+}
+
+/* ===========================
+   Transaction History (localStorage)
+   =========================== */
+const HISTORY_KEY = 'lucidify_txs_v1';
+function loadHistory(){
+  try{ const json = localStorage.getItem(HISTORY_KEY); return json ? JSON.parse(json) : []; }
+  catch(e){ console.error("history load failed", e); return []; }
+}
+function saveHistory(arr){ localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)); }
+function addHistoryItem(item){ // item: {hash, matic, lucy, status, timestamp}
+  const arr = loadHistory();
+  arr.unshift(item); // newest first
+  saveHistory(arr);
+  renderHistory();
+}
+function updateHistoryStatus(hash, newStatus, receipt){
+  const arr = loadHistory();
+  const idx = arr.findIndex(i => i.hash === hash);
+  if(idx >= 0){
+    arr[idx].status = newStatus;
+    arr[idx].receipt = receipt || null;
+    saveHistory(arr);
+    renderHistory();
   } else {
-    youGet.textContent = `0 LUCY`;
+    // might be pending in UI, add new
+    addHistoryItem({hash, matic:0, lucy:0, status:newStatus, timestamp:Date.now(), receipt});
   }
 }
-maticInput.addEventListener("input", updateReceive);
+function clearHistory(){ localStorage.removeItem(HISTORY_KEY); renderHistory(); }
 
-/* -------------------------
-   Progress demo (static)
-   ------------------------- */
-document.getElementById("progressPercent").textContent = "45%";
-document.getElementById("progressFill").style.width = "45%";
+/* Render panel */
+const historyPanel = document.getElementById("historyPanel");
+const historyList = document.getElementById("historyList");
+function renderHistory(){
+  const arr = loadHistory();
+  historyList.innerHTML = '';
+  if(arr.length === 0){
+    const empty = document.createElement('div'); empty.style.color = '#9fb0c6'; empty.textContent = 'No transactions yet';
+    historyList.appendChild(empty); return;
+  }
+  arr.forEach(item=>{
+    const div = document.createElement('div'); div.className='history-item';
+    const statusColor = item.status === 'confirmed' ? 'var(--green)' : item.status === 'pending' ? 'var(--yellow)' : '#ff8b8b';
+    const date = new Date(item.timestamp || Date.now()).toLocaleString();
+    div.innerHTML = `
+      <div class="meta"><div style="color:${statusColor}">${item.status.toUpperCase()}</div><div style="color:#9fb0c6">${date}</div></div>
+      <div style="display:flex;justify-content:space-between;gap:8px">
+        <div style="font-weight:800">${item.matic || '—'} MATIC</div>
+        <div style="color:var(--yellow);font-weight:800">${item.lucy || '—'} LUCY</div>
+      </div>
+      <div style="font-size:13px;color:#9fb0c6;word-break:break-all">
+        Tx: ${item.hash ? `<a href="https://polygonscan.com/tx/${item.hash}" target="_blank">${item.hash}</a>` : '—'}
+      </div>
+    `;
+    historyList.appendChild(div);
+  });
+}
 
-/* -------------------------
-   MetaMask / Ethers.js Integration
-   ------------------------- */
-const connectBtn = document.getElementById("connectBtn");
-const walletLabel = document.getElementById("wallet");
-const networkLabel = document.getElementById("network");
+/* Show panel (slide in) */
+function showHistoryPanel(autoClose=false, duration=3000){
+  historyPanel.classList.add('open');
+  historyPanel.setAttribute('aria-hidden','false');
+  gsap.fromTo(historyPanel, {x:60, opacity:0}, {x:0, opacity:1, duration:0.4, ease:"power2.out"});
+  if(autoClose){
+    setTimeout(()=>{ closeHistoryPanel(); }, duration);
+  }
+}
+function closeHistoryPanel(){
+  gsap.to(historyPanel, {x:60, opacity:0, duration:0.33, ease:"power2.in", onComplete: ()=>{
+    historyPanel.classList.remove('open');
+    historyPanel.setAttribute('aria-hidden','true');
+  }});
+}
+
+/* Hook buttons */
+document.getElementById('historyToggle').addEventListener('click', ()=>{
+  if(historyPanel.classList.contains('open')) closeHistoryPanel();
+  else showHistoryPanel(false);
+});
+document.getElementById('closeHistory').addEventListener('click', closeHistoryPanel);
+document.getElementById('clearHistory').addEventListener('click', ()=>{ if(confirm('Clear all transaction history?')) clearHistory(); });
+
+/* Initialize render */
+renderHistory();
+
+/* ===========================
+   Chart.js tokenomics
+   =========================== */
+const ctx = document.getElementById("tokChart").getContext("2d");
+const tokenData = {
+  labels: ["Liquidity 35%","Ecosystem 20%","Presale 15%","Marketing 10%","Team 10%","Rewards 5%","Treasury 5%"],
+  datasets:[{data:[35,20,15,10,10,5,5], backgroundColor:["#00FF66","#4EE1A1","#FFD93D","#FFC972","#9AD1FF","#C6A0FF","#FF9BB2"], borderWidth:0 }]
+};
+const tokChart = new Chart(ctx, { type:'doughnut', data: tokenData, options:{ cutout:'64%', plugins:{ legend:{position:'bottom', labels:{color:'#cfe6d9'}}}}});
+
+/* ===========================
+   Receive calculation
+   =========================== */
+const maticInput = document.getElementById("matic"), youGet = document.getElementById("youGet"), rateToken = document.getElementById("rateToken");
+rateToken.textContent = RATE;
+function updateReceive(){ const v=parseFloat(maticInput.value); youGet.textContent = (!isNaN(v) && v>0) ? `${(v*RATE).toLocaleString(undefined,{maximumFractionDigits:2})} LUCY` : '0 LUCY'; }
+maticInput.addEventListener('input', updateReceive);
+
+/* ===========================
+   MetaMask / ethers.js
+   =========================== */
+const connectBtn = document.getElementById("connectBtn"); const walletLabel = document.getElementById("wallet"); const networkLabel = document.getElementById("network");
 let provider, signer, userAddress;
 
 async function connectWallet(){
-  if(!window.ethereum) {
-    alert("MetaMask not detected. Please install MetaMask extension.");
-    return;
-  }
+  if(!window.ethereum){ showToast('warn','Wallet','MetaMask not detected. Install it.'); return; }
   try{
     provider = new ethers.providers.Web3Provider(window.ethereum, "any");
     await provider.send("eth_requestAccounts", []);
     signer = provider.getSigner();
     userAddress = await signer.getAddress();
-    walletLabel.textContent = userAddress.slice(0,6) + "..." + userAddress.slice(-4);
+    walletLabel.textContent = userAddress.slice(0,6)+'...'+userAddress.slice(-4);
     const net = await provider.getNetwork();
-    networkLabel.textContent = net.chainId === 137 ? "Polygon (137)" : `${net.name} (${net.chainId})`;
-    connectBtn.textContent = "Connected";
-    connectBtn.classList.remove("btn-primary"); connectBtn.classList.add("btn-outline");
-    // set button states
-  } catch(err){
-    console.error(err); alert("Connection failed: " + (err.message || err));
-  }
+    networkLabel.textContent = net.chainId === 137 ? 'Polygon (137)' : `${net.name} (${net.chainId})`;
+    connectBtn.textContent = 'Connected';
+    connectBtn.classList.remove('btn-primary'); connectBtn.classList.add('btn-outline');
+    showToast('success','Wallet','Connected: '+userAddress.slice(0,8));
+  }catch(e){ console.error(e); showToast('error','Wallet Error', e.message || e); }
 }
-connectBtn.addEventListener("click", connectWallet);
+connectBtn.addEventListener('click', connectWallet);
 
-/* Offer to switch to Polygon */
 async function ensurePolygon(){
   if(!provider) return false;
   const net = await provider.getNetwork();
   if(net.chainId === 137) return true;
   try{
-    await window.ethereum.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: "0x89" }],
-    });
+    await window.ethereum.request({ method: "wallet_switchEthereumChain", params:[{chainId: "0x89"}]});
     return true;
   }catch(switchError){
-    // if not added, try add
     if(switchError.code === 4902){
       try{
-        await window.ethereum.request({
-          method: 'wallet_addEthereumChain',
-          params: [{
-            chainId: '0x89',
-            chainName: 'Polygon Mainnet',
-            nativeCurrency: {name:'MATIC',symbol:'MATIC',decimals:18},
-            rpcUrls:['https://polygon-rpc.com/'],
-            blockExplorerUrls:['https://polygonscan.com/']
-          }]
-        });
+        await window.ethereum.request({ method:'wallet_addEthereumChain', params:[{ chainId:'0x89', chainName:'Polygon Mainnet', nativeCurrency:{name:'MATIC',symbol:'MATIC',decimals:18}, rpcUrls:['https://polygon-rpc.com/'], blockExplorerUrls:['https://polygonscan.com/'] }]});
         return true;
       }catch(e){ console.error(e); return false; }
     }
@@ -409,65 +506,68 @@ async function ensurePolygon(){
   }
 }
 
-/* -------------------------
-   Buy flow (calls contract)
-   ------------------------- */
+/* ===========================
+   Buy flow with history & toasts
+   =========================== */
 const buyBtn = document.getElementById("buyNow");
-buyBtn.addEventListener("click", async () => {
-  // Basic checks
-  if(!window.ethereum){
-    alert("MetaMask not detected.");
-    return;
-  }
-  if(!provider || !signer || !userAddress){
-    await connectWallet();
-    if(!userAddress) return;
-  }
-  const ok = await ensurePolygon();
-  if(!ok){ alert("Please switch to Polygon network and try again."); return; }
+async function submitBuy(){
+  if(!window.ethereum){ showToast('error','MetaMask','MetaMask not detected'); return; }
+  if(!provider || !signer || !userAddress){ await connectWallet(); if(!userAddress) return; }
+  const ok = await ensurePolygon(); if(!ok){ showToast('warn','Network','Switch to Polygon and try again'); return; }
 
   const maticAmt = parseFloat(maticInput.value);
-  if(isNaN(maticAmt) || maticAmt <= 0){ alert("Enter a valid MATIC amount."); return; }
+  if(isNaN(maticAmt) || maticAmt<=0){ showToast('warn','Input','Enter valid MATIC amount'); return; }
 
-  // If ABI not supplied, prompt user to paste ABI to PRESALE_ABI in the code.
+  // If ABI empty: provide instructions & abort
   if(!Array.isArray(PRESALE_ABI) || PRESALE_ABI.length === 0){
-    const proceed = confirm("No contract ABI is present in the UI.\n\nTo perform on-chain purchases the presale contract ABI must be added to the page (PRESALE_ABI array). Click OK to copy a template instruction to your clipboard.");
-    if(proceed){
-      const instructions = `/* PASTE ABI HERE \\nconst PRESALE_ABI = [ ...ABI JSON... ]; \\nAlso ensure buy function name (buyTokens) matches your contract or change buyContractFunctionName variable. */`;
-      try{ await navigator.clipboard.writeText(instructions); alert("Instructions copied to clipboard. Paste ABI into the PRESALE_ABI variable in the HTML."); }
-      catch(e){ alert("Copy failed. See console for instructions."); console.log(instructions); }
-    }
+    showToast('warn','ABI Missing','Paste your presale contract ABI into the PRESALE_ABI array in the HTML to enable on-chain buys.');
     return;
   }
 
-  // Construct contract instance and call buy function
   try{
     const contract = new ethers.Contract(PRESALE_CONTRACT_ADDRESS, PRESALE_ABI, signer);
-    // estimate value
+    if(typeof contract[buyContractFunctionName] !== 'function'){ showToast('error','ABI Mismatch', `Function "${buyContractFunctionName}" not found in ABI`); return; }
+
+    // send transaction
+    buyBtn.disabled = true; buyBtn.textContent = 'Sending...';
+    showToast('warn','Tx', 'Submitting transaction — check MetaMask', 5000);
+
     const value = ethers.utils.parseEther(maticAmt.toString());
-    // Attempt to call buy function
-    if(typeof contract[buyContractFunctionName] !== "function"){
-      alert(`Contract does not expose function "${buyContractFunctionName}". Check ABI or change buyContractFunctionName variable in the UI.`);
-      return;
-    }
-    buyBtn.disabled = true; buyBtn.textContent = "Processing...";
+    // send tx
     const tx = await contract[buyContractFunctionName]({ value });
-    console.log("tx sent", tx);
-    alert("Transaction sent. Waiting for confirmation...\n\nTx Hash: " + tx.hash);
+    // add pending history
+    addHistoryItem({ hash: tx.hash, matic: maticAmt, lucy: (maticAmt*RATE), status:'pending', timestamp: Date.now() });
+    showToast('warn','Tx Sent', `Tx submitted: ${tx.hash}`, 6000);
+
+    // wait for receipt
     const receipt = await tx.wait();
-    console.log("receipt", receipt);
-    alert("Purchase confirmed! Tx Hash: " + receipt.transactionHash);
-    buyBtn.disabled = false; buyBtn.textContent = "Buy (via Contract)";
+    // update history
+    updateHistoryStatus(tx.hash, 'confirmed', receipt);
+    showToast('success','Confirmed', `Purchase confirmed — Tx: ${tx.hash}`, 7000);
+
+    // slide in history panel because user asked Option C
+    showHistoryPanel(true, 8000); // open and auto-close? Here we keep open but autoClose param set true with 8s; adjust as needed
   }catch(err){
     console.error(err);
-    alert("Purchase failed: " + (err && err.message ? err.message : err));
-    buyBtn.disabled = false; buyBtn.textContent = "Buy (via Contract)";
+    const message = err && err.message ? err.message : String(err);
+    showToast('error','Tx Failed', message, 8000);
+  }finally{
+    buyBtn.disabled = false; buyBtn.textContent = 'Buy (via Contract)';
   }
+}
+buyBtn.addEventListener('click', submitBuy);
+
+/* ===========================
+   If user manually triggers buy in demo (no ABI) — save a demo tx
+   =========================== */
+document.getElementById('ctaBuy').addEventListener('click', ()=>{
+  // just scroll to presale
+  document.getElementById('presale').scrollIntoView({behavior:'smooth', block:'start'});
 });
 
-/* -------------------------
-   Whitepaper PDF generation (jsPDF)
-   ------------------------- */
+/* ===========================
+   Whitepaper PDF generation
+   =========================== */
 const { jsPDF } = window.jspdf;
 document.getElementById("downloadWhitepaper").addEventListener("click", () => {
   const doc = new jsPDF({unit:'pt',format:'a4'});
@@ -501,14 +601,14 @@ document.getElementById("downloadWhitepaper").addEventListener("click", () => {
     `Audits & liquidity proofs will be published when available.`
   ];
   let line = 100;
-  body.forEach((t) => { doc.text(t, 40, line); line += 18; });
-  const filename = "Lucidify_Whitepaper_Brief.pdf";
-  doc.save(filename);
+  body.forEach((t) => { doc.text(t, 40, line); line += 16; });
+  doc.save("Lucidify_Whitepaper_Brief.pdf");
+  showToast('success','Whitepaper','Downloaded (brief)', 4000);
 });
 
-/* -------------------------
-   Background 3D: Three.js neon grid + particles
-   ------------------------- */
+/* ===========================
+   3D Background (Three.js)
+   =========================== */
 (function(){
   const canvas = document.getElementById("bgCanvas");
   const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
@@ -518,34 +618,33 @@ document.getElementById("downloadWhitepaper").addEventListener("click", () => {
   camera.position.set(0,6,18);
 
   // lights
-  scene.add(new THREE.AmbientLight(0xffffff, 0.15));
-  const p1 = new THREE.PointLight(0x00ff66, 1.2, 60); p1.position.set(10,10,10); scene.add(p1);
-  const p2 = new THREE.PointLight(0xffd93d, 0.9, 60); p2.position.set(-10,6,-10); scene.add(p2);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.14));
+  const p1 = new THREE.PointLight(0x00ff66, 1.2, 80); p1.position.set(10,10,10); scene.add(p1);
+  const p2 = new THREE.PointLight(0xffd93d, 0.9, 80); p2.position.set(-10,6,-10); scene.add(p2);
 
-  // Grid plane neon lines
+  // neon grid (wireframe)
   const gridSize = 80;
   const gridGeo = new THREE.PlaneGeometry(gridSize, gridSize, 80, 80);
-  const gridMat = new THREE.LineBasicMaterial({ color: 0x00ff66, opacity: 0.06, transparent:true });
-  // draw wireframe lines as THREE.LineSegments
   const edges = new THREE.EdgesGeometry(gridGeo);
+  const gridMat = new THREE.LineBasicMaterial({ color: 0x00ff66, opacity: 0.06, transparent:true });
   const grid = new THREE.LineSegments(edges, gridMat);
   grid.rotation.x = -Math.PI/2;
   grid.position.y = -3;
   scene.add(grid);
 
-  // Ring
+  // ring
   const ringGeo = new THREE.TorusGeometry(3.2, 0.07, 16, 120);
   const ringMat = new THREE.MeshStandardMaterial({ color:0x00ff66, emissive:0x00ff66, roughness:0.1, metalness:0.8 });
   const ring = new THREE.Mesh(ringGeo, ringMat);
   ring.rotation.x = Math.PI/2.4; ring.position.y = 0.2;
   scene.add(ring);
 
-  // Particles
-  const pCount = 600;
+  // particles
+  const pCount = 700;
   const pos = new Float32Array(pCount*3);
   for(let i=0;i<pCount*3;i++){ pos[i] = (Math.random()-0.5)*60; }
   const partGeo = new THREE.BufferGeometry(); partGeo.setAttribute('position', new THREE.BufferAttribute(pos,3));
-  const partMat = new THREE.PointsMaterial({ color:0x00ff66, size:0.05, transparent:true, opacity:0.6, blending:THREE.AdditiveBlending });
+  const partMat = new THREE.PointsMaterial({ color:0x00ff66, size:0.06, transparent:true, opacity:0.55, blending:THREE.AdditiveBlending });
   const particles = new THREE.Points(partGeo, partMat);
   scene.add(particles);
 
@@ -557,7 +656,7 @@ document.getElementById("downloadWhitepaper").addEventListener("click", () => {
     const t = clock.getElapsedTime();
     ring.rotation.z = t * 0.35;
     particles.rotation.y = t * 0.02;
-    grid.position.z = Math.sin(t*0.1)*0.8;
+    grid.position.z = Math.sin(t*0.12)*0.9;
     camera.position.x = Math.sin(t*0.04)*1.2;
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
@@ -565,18 +664,24 @@ document.getElementById("downloadWhitepaper").addEventListener("click", () => {
   animate();
 })();
 
-/* -------------------------
-   GSAP small entrance animations
-   ------------------------- */
+/* ===========================
+   GSAP entrance
+   =========================== */
 gsap.from("header", {y:-20, opacity:0, duration:0.8, ease:"power2.out"});
 gsap.from(".hero-left", {x:-20, opacity:0, duration:0.9, delay:0.1});
 gsap.from(".right-stack", {x:20, opacity:0, duration:0.9, delay:0.15});
-gsap.from(".features .feature", {y:8, opacity:0, stagger:0.08, duration:0.6});
+gsap.from(".feature", {y:10, opacity:0, stagger:0.08, duration:0.6});
 
-/* -------------------------
-   Quick helper: scroll to presale on CTA
-   ------------------------- */
-document.getElementById("ctaBuy").addEventListener("click", ()=>{ location.hash="#presale"; window.scrollTo({top:document.getElementById("presale").offsetTop - 80, behavior:'smooth'}); });
+/* ===========================
+   Init page bits
+   =========================== */
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* Load existing history on start */
+renderHistory();
+
+/* show a small toast on page load */
+showToast('warn','Demo Mode','ABI empty — paste PRESALE_ABI to enable buys', 6500);
 
 </script>
 </body>
